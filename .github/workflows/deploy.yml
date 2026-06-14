@@ -1,0 +1,54 @@
+name: build-and-deploy
+
+# Two-signal refresh: rebuild data.json on a daily cron + on demand + on push.
+on:
+  schedule:
+    - cron: "0 11 * * *"      # 11:00 UTC ~ 16:30 IST, after the NSE close
+  workflow_dispatch: {}        # manual "Run workflow" button
+  push:
+    branches: [main]
+    paths:                     # only rebuild when something that affects output changes
+      - "build.py"
+      - "config.yaml"
+      - "config.py"
+      - "cache_util.py"
+      - "data/**"
+      - "model/**"
+      - "output/index.html"
+      - ".github/workflows/deploy.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install deps
+        run: pip install -r requirements.txt
+      - name: Build data.json (fetch + score + audit)
+        run: python build.py
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output        # index.html + freshly-built data.json
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

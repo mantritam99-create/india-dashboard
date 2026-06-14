@@ -1,0 +1,282 @@
+# ======================================================================
+#  india-dashboard control panel
+#  Every weight, inversion, anchor and threshold lives here.
+#  Nothing tunable is hardcoded in .py.  Re-read model/backtest.py before
+#  changing weights / floor / bands / tripwires (see HONESTY note at bottom).
+# ======================================================================
+
+cache:
+  market_max_age_h: 12     # daily market series: refetch at most twice a day
+  monthly_max_age_h: 720   # ~30 days
+
+# ---------------------------------------------------------------------------
+#  WEIGHTS for the 5-bucket composite (must sum to 1.0).
+#  The asymmetry is DELIBERATE: India's real crashes (2013 taper tantrum,
+#  2018 NBFC) were capital-flow / currency driven, not domestic-yield driven.
+#  Do NOT "balance" these evenly -- the heavy external_currency weight is the point.
+# ---------------------------------------------------------------------------
+weights:
+  valuation:         0.25
+  external_currency: 0.25
+  macro_stress:      0.20
+  domestic_flows:    0.15
+  sentiment_froth:   0.15
+
+# --- breadth: an indicator is "in the danger zone" above this stress score ---
+#  final = composite * (floor + (1-floor) * breadth)
+#  floor starts at 0.50 -- DO NOT trust it until calibrated by backtest.py
+breadth:
+  danger_zone: 75
+  floor: 0.50
+
+# --- normalization knobs ---
+normalize:
+  min_hist: 30          # min observations before a market percentile is trusted
+  anchor_switch_n: 24   # a manual indicator switches anchor -> percentile at >= this many readings
+  stale_days: 45        # a manual reading older than this is flagged stale (monthly cadence)
+
+# --- confidence interval:  +/- (base + stale_per_day*max_stale_days + dispersion) ---
+#  Manual-heavy data means staleness matters MORE here than the US version,
+#  so stale_per_day is higher and missing whole buckets is penalised hard.
+confidence:
+  base: 5
+  stale_per_day: 0.15        # per day past an indicator's freshness budget
+  missing_bucket_penalty: 7
+  coverage_penalty: 16       # * (1 - coverage)
+  dispersion_penalty: 6      # * (stdev of bucket scores / 50), capped
+
+# ---------------------------------------------------------------------------
+#  INDICATORS
+#  Each: bucket, direction, source, and (for anchor-scored ones) calm/stress.
+#    direction: high = high readings are stressful (score = percentile)
+#               low  = low/negative readings are stressful (score = 100-pctile)
+#    source:    market  -> Yahoo chart endpoint (keyless) + stooq fallback
+#               manual  -> data/manual_inputs.csv (anchor -> percentile auto-switch)
+#               derived -> computed from other indicators (anchor-scored)
+#    calm/stress: value mapped to stress 0 / 100 by linear interp (anchor mode).
+#                 The calm/stress ORDERING must agree with `direction`
+#                 (direction high => stress>calm; low => stress<calm). The
+#                 directionality audit enforces this on every build.
+# ---------------------------------------------------------------------------
+indicators:
+
+  # ---------------- VALUATION (rank vs India's OWN history) ----------------
+  nifty_pe:
+    name: "Nifty 50 trailing PE"
+    bucket: valuation
+    direction: high            # high PE = froth
+    source: manual
+    calm: 18                   # India's long-run average-ish
+    stress: 28                 # >28 historically = froth
+  nifty_pb:
+    name: "Nifty 50 PB ratio"
+    bucket: valuation
+    direction: high
+    source: manual
+    calm: 3.0
+    stress: 4.5                # above 4 historically = froth
+  buffett_in:
+    name: "Buffett Indicator (mcap/GDP %)"
+    bucket: valuation
+    direction: high
+    source: manual
+    calm: 95                   # India ~100-120% historically
+    stress: 135
+  ey_gsec_gap:
+    name: "Earnings yield - 10Y G-sec (pp)"
+    bucket: valuation
+    direction: low             # negative = equities expensive vs bonds = stress
+    source: derived
+    formula: ey_minus_gsec
+    calm: 1.0                  # earnings yield 1pp above bond yield = cheap
+    stress: -2.5               # 2.5pp below = expensive
+
+  # ------------- EXTERNAL / CURRENCY (the EM stress core) ------------------
+  usdinr_12m:
+    name: "USD/INR 12-month % move"
+    bucket: external_currency
+    direction: high            # rupee weakening (INR=X rising) = stress
+    source: market
+    ticker: "INR=X"
+    transform: pct12m
+  fx_reserves_8w:
+    name: "FX reserves 8-week change %"
+    bucket: external_currency
+    direction: low             # falling reserves = RBI defending = stress
+    source: manual
+    calm: 1.5
+    stress: -6.0
+  fii_3m:
+    name: "FII net equity, rolling 3m (Rs cr)"
+    bucket: external_currency
+    direction: low             # outflows = stress; THE key EM signal
+    source: manual
+    calm: 40000
+    stress: -55000
+  brent_inr:
+    name: "Brent crude, INR-adjusted"
+    bucket: external_currency
+    direction: high            # India imports ~85% of oil
+    source: market
+    transform: brent_inr       # BZ=F (USD) * INR=X
+  trade_deficit:
+    name: "Trade deficit trend (USD bn/mo)"
+    bucket: external_currency
+    direction: high            # widening = stress
+    source: manual
+    calm: 14
+    stress: 30
+
+  # ----------------------- MACRO STRESS -----------------------------------
+  gsec_10y:
+    name: "India 10Y G-sec yield (%)"
+    bucket: macro_stress
+    direction: high            # rising sharply = stress
+    source: manual
+    calm: 6.5
+    stress: 8.2
+  gsec_repo_sprd:
+    name: "10Y minus repo spread (pp)"
+    bucket: macro_stress
+    direction: high            # steepening under stress
+    source: derived
+    formula: gsec_minus_repo
+    calm: 0.3
+    stress: 1.8
+  cpi_gap:
+    name: "CPI vs RBI 4% target (pp above)"
+    bucket: macro_stress
+    direction: high            # distance above 4% = stress
+    source: manual
+    calm: 0.0                  # at target
+    stress: 3.0                # 7% CPI
+  iip:
+    name: "IIP growth (% YoY)"
+    bucket: macro_stress
+    direction: low             # falling = stress
+    source: manual
+    calm: 6.0
+    stress: -2.0
+  gst_yoy:
+    name: "GST collections (% YoY)"
+    bucket: macro_stress
+    direction: low             # falling = demand weakness
+    source: manual
+    calm: 12.0
+    stress: -2.0
+
+  # ----------- DOMESTIC FLOWS / LEVERAGE (Korea-style retail risk) --------
+  sip_inflows:
+    name: "Monthly SIP inflows (Rs cr)"
+    bucket: domestic_flows
+    direction: low             # reversal props/unprops the market
+    source: manual
+    calm: 23000
+    stress: 13000
+  fno_cash_ratio:
+    name: "F&O / cash turnover ratio"
+    bucket: domestic_flows
+    direction: high            # extreme = speculative froth
+    source: manual
+    calm: 100
+    stress: 350
+  mtf_book:
+    name: "MTF (margin funding) book (Rs cr)"
+    bucket: domestic_flows
+    direction: high            # record highs = leverage risk
+    source: manual
+    calm: 40000
+    stress: 90000
+  demat_growth:
+    name: "Demat account growth (% YoY)"
+    bucket: domestic_flows
+    direction: high            # parabolic = retail euphoria
+    source: manual
+    calm: 12
+    stress: 35
+
+  # ----------------------- SENTIMENT / FROTH ------------------------------
+  india_vix:
+    name: "India VIX"
+    bucket: sentiment_froth
+    direction: high            # high = fear (anchor, NOT pure percentile:
+    source: market             #  low vix = complacency, high = fear)
+    ticker: "^INDIAVIX"
+    method: anchor
+    calm: 12
+    stress: 25
+  adv_decl:
+    name: "Advance-decline ratio"
+    bucket: sentiment_froth
+    direction: low             # narrowing breadth = stress
+    source: manual
+    calm: 1.3
+    stress: 0.6
+  sme_ipo_gains:
+    name: "SME IPO avg listing gain (%)"
+    bucket: sentiment_froth
+    direction: high            # India's signature top signal; +200% = mania
+    source: manual
+    calm: 20
+    stress: 120
+  smallcap_ratio:
+    name: "Midcap / largecap index ratio"
+    bucket: sentiment_froth
+    direction: high            # mid/small outperformance peak = late cycle
+    source: market
+    transform: midcap_ratio    # ^NSMIDCP / ^NSEI, percentile vs own history.
+                               # (No keyless long-history Nifty Smallcap exists;
+                               #  Nifty Midcap is the froth-broadening proxy.)
+
+# --- components used by `derived` formulas but not scored on their own ---
+#  (repo rate: keep current here; cheap to edit when RBI moves)
+derived_inputs:
+  repo_rate: 6.50
+
+# --- context-only tickers (displayed, NOT scored) ---
+context_tickers:
+  "^NSEI":    {name: "Nifty 50"}
+  "^NSEBANK": {name: "Bank Nifty"}
+
+# ---------------------------------------------------------------------------
+#  VERDICT BANDS  (POSTURE).  CALIBRATED by model/backtest.py (floor 0.50).
+#  Point-in-time, market-driven (external+sentiment) composite, 2005-2021:
+#    2013 taper peak ~76 | 2018 NBFC peak ~64 | COVID pre-peak ~24 | benign median ~36.
+#  So warning is set near the 2018 level and acute near the 2013 level -- the model
+#  actually FIRES on real events without sitting lit through benign months.
+#  NOTE: backtest covers only 2 of 5 buckets (the 3 manual buckets have no history),
+#  so for the LIVE 5-bucket composite these bands are directional guides -- lean on
+#  the BUCKET scores + TRIP-WIRES (the action layer) for decisions, per spec sec 4.
+# ---------------------------------------------------------------------------
+bands:
+  composite:
+    benign:  50     # below = no crisis signal
+    watch:   58     # 50-58 = late-cycle watch
+    warning: 65     # 58-65 = elevated; >=65 = warning (2018-scale)
+    acute:   75     # >=75 = broad acute stress (2013-scale)
+
+# ---------------------------------------------------------------------------
+#  TRIP-WIRES (ACTION).  The "what would confirm the crash" checklist.
+#  Two-signal hierarchy: COMPOSITE = posture, TRIP-WIRES = action.
+#  `indicator` maps to an indicator key above; current value is read live.
+#  Tune thresholds in the backtest; do NOT accept these as final.
+# ---------------------------------------------------------------------------
+tripwires:
+  # NOTE: spec set USD/INR crisis zone at 90, but spot is already ~96 (structural
+  # rupee weakness), which would leave this wire permanently tripped and useless as
+  # an action signal. Tuned up to 100 (next psychological break level). Revisit as
+  # the rupee drifts; a 3-month rate-of-change wire may eventually serve better.
+  - {indicator: usdinr_raw,   name: "USD/INR",            trips_when: above, level: 100,    unit: "",     note: "rupee crisis zone (tuned from 90; spot ~96)"}
+  - {indicator: fii_3m,       name: "FII 3m net flows",   trips_when: below, level: -50000, unit: " cr",  note: "capital flight"}
+  - {indicator: fx_reserves_8w, name: "FX reserves 8wk %", trips_when: below, level: -5,    unit: "%",    note: "reserve drain / RBI defending hard"}
+  - {indicator: gsec_10y,     name: "India 10Y G-sec",    trips_when: above, level: 7.8,    unit: "%",    note: "bond market stress"}
+  - {indicator: india_vix,    name: "India VIX",          trips_when: above, level: 25,     unit: "",     note: "volatility regime break"}
+  - {indicator: cpi_gap,      name: "CPI (% above 4%)",   trips_when: above, level: 2.5,    unit: "pp",   note: "inflation out of RBI band (6.5% CPI)"}
+  - {indicator: brent_inr,    name: "Brent crude (USD)",  trips_when: above, level: 100,    unit: "",     note: "oil import shock", raw: brent_usd}
+
+# ---------------------------------------------------------------------------
+#  HONESTY (non-negotiable, per spec section 6):
+#  Do not tune weights, floor, or thresholds to produce a higher composite.
+#  Only change them if the backtest against 2008/2013/2018 shows miscalibration.
+#  The model's job is to be RIGHT, not reassuring.
+# ---------------------------------------------------------------------------

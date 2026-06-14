@@ -1,0 +1,5 @@
+pandas>=2.0
+numpy>=1.24
+PyYAML>=6.0
+# Market data is pulled from Yahoo's chart endpoint directly via urllib
+# (keyless, no fragile wrapper) with a stooq.com CSV fallback -- no yfinance needed.

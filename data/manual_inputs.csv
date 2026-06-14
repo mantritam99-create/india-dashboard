@@ -1,0 +1,17 @@
+date,indicator,value,note
+2026-05-31,nifty_pe,22.4,niftyindices.com daily PE
+2026-05-31,nifty_pb,3.6,niftyindices.com daily PB
+2026-05-31,buffett_in,116,total mcap / nominal GDP (approx)
+2026-05-31,fx_reserves_8w,0.8,RBI weekly stat supplement; 8wk % change in reserves
+2026-05-31,fii_3m,-14200,NSDL/CDSL rolling 3m net equity (Rs cr)
+2026-05-31,trade_deficit,22.5,monthly merchandise trade deficit USD bn
+2026-05-31,gsec_10y,6.62,India 10Y benchmark G-sec yield %
+2026-05-31,cpi_gap,0.7,CPI ~4.7% vs RBI 4% target
+2026-05-31,iip,3.8,IIP % YoY (MoSPI)
+2026-05-31,gst_yoy,9.2,GST gross collections % YoY (PIB)
+2026-05-31,sip_inflows,26800,AMFI monthly SIP inflows Rs cr
+2026-05-31,fno_cash_ratio,285,NSE F&O turnover / cash turnover
+2026-05-31,mtf_book,79000,broker MTF/margin funding book Rs cr
+2026-05-31,demat_growth,21,CDSL+NSDL demat accounts % YoY
+2026-05-31,adv_decl,1.05,NSE advance/decline ratio (1m avg)
+2026-05-31,sme_ipo_gains,78,avg SME IPO listing-day gain % (chittorgarh)
