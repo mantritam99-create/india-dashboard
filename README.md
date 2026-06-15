@@ -156,6 +156,29 @@ the model tells you honestly when it's running on old data.
 
 ---
 
+## V2 — the decision-support layer (`model/analytics.py` → `data.json` → `output/index.html`)
+
+The dashboard is a *quantified country-macro memo with scoring rails*, not a trading cockpit.
+On top of the live composite it renders:
+
+- **Three stress lenses** — recession · credit/currency · asset-bubble — so "recession risk ≠
+  credit risk ≠ bubble risk" stays explicit (India's froth fires earlier than its macro).
+- **Hero interpretation line** — a generated top-line read; **threshold ladder** next to the score.
+- **Distance-to-trip gauges** — each trip-wire as a floor→trigger fill % ("what could break next"),
+  paired with **bull-case defeaters** ("why risk is capped") as the headline anchor.
+- **Composite trajectory** (market-core, ~15y) with stress bands + threshold lines — the 2013 spike
+  is visible. **Contribution waterfall**, **forward-returns by band**, **indicative odds**,
+  **historical analogs**, **regime label**, **freshness/confidence header**.
+- **Scenario engine** — re-scores the composite client-side (Rupee crisis / Oil shock / Midcap mania
+  / FII exodus) with the same math as `build.py`. **Methodology drawer**, **tooltips**,
+  sortable/filterable **indicator table** with sparklines + trend arrows.
+
+Honest scope: everything *historical* (trajectory, forward-returns, analogs, probabilities) is the
+**market-core** (external + sentiment) — the only buckets with back-history. A key, non-obvious
+finding surfaced and is captioned in the UI: India's market-core stress is **contrarian at extremes**
+— the 70+ readings are the 2008/2013 capitulation lows, which *preceded rebounds*. High composite is
+not a sell signal; the asset-bubble lens (valuations/froth) is the "expensive" warning.
+
 ## Run it
 
 ```bash

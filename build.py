@@ -13,9 +13,13 @@ import json
 import datetime
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:                       # Windows console is cp1252; our strings use — and ≠ (UTF-8 in data)
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
 import pandas as pd
 from config import CFG, ROOT, WEIGHTS, BUCKETS, indicators as cfg_indicators
-from model import normalize, scoring
+from model import normalize, scoring, analytics
 from data import fetch_market
 
 OUT = os.path.join(ROOT, "output", "data.json")
@@ -75,8 +79,13 @@ def build():
     if problems:
         print("  !! AUDIT PROBLEMS:", "; ".join(problems))
 
+    # ---- V2 analytics (trajectory, distance-to-trip, fwd returns, regime, analogs...) ----
+    an = analytics.compute_all(rows, c, values)
+    print(f"  REGIME              : {an['regime']['label']}  ({an['regime']['why']})")
+    print(f"  READ                : {an['interpretation']}")
+
     # ---- assemble data.json ----
-    payload = _payload(rows, c, a, values)
+    payload = _payload(rows, c, a, values, an)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
@@ -108,10 +117,12 @@ def _inject_snapshot(payload):
         print("  [warn] bootstrap-data block not found; snapshot not embedded")
 
 
-def _payload(rows, c, a, values):
+def _payload(rows, c, a, values, an):
+    sparks = an.pop("sparklines", {})
     by_bucket = {b: [] for b in BUCKETS}
     ind_out = []
     for r in rows:
+        spark = [x for x in (sparks.get(r["key"]) or []) if x is not None]
         item = {
             "key": r["key"], "name": r["name"], "bucket": r["bucket"],
             "bucket_label": BUCKET_LABELS[r["bucket"]],
@@ -120,6 +131,8 @@ def _payload(rows, c, a, values):
             "score": _num(r.get("score")), "ok": r["ok"],
             "stale": bool(r.get("stale")), "age_days": r.get("age_days"),
             "date": str(r["date"]) if r.get("date") else None,
+            "spark": spark if len(spark) >= 3 else None,
+            "trend": _num(spark[-1] - spark[-4]) if len(spark) >= 4 else None,
         }
         ind_out.append(item)
         by_bucket[r["bucket"]].append(item)
@@ -149,7 +162,36 @@ def _payload(rows, c, a, values):
                 chg = _num((s.iloc[-1] / prior.iloc[-1] - 1) * 100)
         context.append({"ticker": tkr, "name": m["name"], "value": last, "chg_12m": chg})
 
+    # contribution / waterfall: each bucket's weighted share of composite_raw
+    contributions = [{
+        "key": b, "label": BUCKET_LABELS[b],
+        "contribution": _num((c["bucket"][b] or 0) * (c["weights_used"].get(b) or 0)),
+    } for b in BUCKETS if c["bucket"][b] is not None]
+
+    # freshness / confidence decomposition
+    manual_dates = [r["date"] for r in rows if r["source"] == "manual" and r.get("date")]
+    stale_count = sum(1 for r in rows if r.get("stale"))
+    by_src = {}
+    for r in rows:
+        by_src.setdefault(r["source"], 0)
+        by_src[r["source"]] += 1
+    conf_map = {"market": 95, "derived": 80, "manual": 70}
+    confidence = [{"source": s, "n": n, "pct": conf_map.get(s, 60)}
+                  for s, n in sorted(by_src.items())]
+    freshness = {
+        "coverage": c["coverage"], "n_live": c["n_live"], "n_total": c["n_total"],
+        "stale_count": stale_count, "margin": c["margin"],
+        "market_asof": datetime.date.today().isoformat(),
+        "manual_oldest": min((str(d) for d in manual_dates), default=None),
+        "manual_newest": max((str(d) for d in manual_dates), default=None),
+        "confidence": confidence,
+    }
+
     return {
+        **an,                      # trajectory, distance_to_trip, forward_returns, fwd_note,
+                                   # analogs, regime, stress_types, interpretation, probabilities
+        "contributions": contributions,
+        "freshness": freshness,
         "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
         "composite": c["composite"], "composite_raw": c["composite_raw"],
         "margin": c["margin"], "breadth": c["breadth"], "coverage": c["coverage"],

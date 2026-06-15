@@ -266,13 +266,14 @@ tripwires:
   # rupee weakness), which would leave this wire permanently tripped and useless as
   # an action signal. Tuned up to 100 (next psychological break level). Revisit as
   # the rupee drifts; a 3-month rate-of-change wire may eventually serve better.
-  - {indicator: usdinr_raw,   name: "USD/INR",            trips_when: above, level: 100,    unit: "",     note: "rupee crisis zone (tuned from 90; spot ~96)"}
-  - {indicator: fii_3m,       name: "FII 3m net flows",   trips_when: below, level: -50000, unit: " cr",  note: "capital flight"}
-  - {indicator: fx_reserves_8w, name: "FX reserves 8wk %", trips_when: below, level: -5,    unit: "%",    note: "reserve drain / RBI defending hard"}
-  - {indicator: gsec_10y,     name: "India 10Y G-sec",    trips_when: above, level: 7.8,    unit: "%",    note: "bond market stress"}
-  - {indicator: india_vix,    name: "India VIX",          trips_when: above, level: 25,     unit: "",     note: "volatility regime break"}
-  - {indicator: cpi_gap,      name: "CPI (% above 4%)",   trips_when: above, level: 2.5,    unit: "pp",   note: "inflation out of RBI band (6.5% CPI)"}
-  - {indicator: brent_inr,    name: "Brent crude (USD)",  trips_when: above, level: 100,    unit: "",     note: "oil import shock", raw: brent_usd}
+  # `floor` = the calm baseline the gauge fills FROM (current sits between floor and level).
+  - {indicator: usdinr_raw,   name: "USD/INR",            trips_when: above, level: 100,    floor: 83,     unit: "",     note: "rupee crisis zone (tuned from 90; spot ~96)"}
+  - {indicator: fii_3m,       name: "FII 3m net flows",   trips_when: below, level: -50000, floor: 20000,  unit: " cr",  note: "capital flight"}
+  - {indicator: fx_reserves_8w, name: "FX reserves 8wk %", trips_when: below, level: -5,    floor: 1.5,    unit: "%",    note: "reserve drain / RBI defending hard"}
+  - {indicator: gsec_10y,     name: "India 10Y G-sec",    trips_when: above, level: 7.8,    floor: 6.0,    unit: "%",    note: "bond market stress"}
+  - {indicator: india_vix,    name: "India VIX",          trips_when: above, level: 25,     floor: 11,     unit: "",     note: "volatility regime break"}
+  - {indicator: cpi_gap,      name: "CPI (% above 4%)",   trips_when: above, level: 2.5,    floor: 0,      unit: "pp",   note: "inflation out of RBI band (6.5% CPI)"}
+  - {indicator: brent_inr,    name: "Brent crude (USD)",  trips_when: above, level: 100,    floor: 65,     unit: "",     note: "oil import shock", raw: brent_usd}
 
 # ---------------------------------------------------------------------------
 #  HONESTY (non-negotiable, per spec section 6):

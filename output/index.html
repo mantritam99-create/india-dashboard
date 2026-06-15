@@ -3,246 +3,486 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>India Recession / Bubble-Risk Dashboard</title>
+<title>India Macro Risk Dashboard</title>
 <style>
   :root{
-    --bg:#0e1117; --panel:#161b22; --panel2:#1c2330; --line:#2a3340;
-    --txt:#e6edf3; --mut:#8b98a8; --calm:#2ea043; --watch:#d4a017;
-    --warn:#e8731c; --acute:#e5484d; --accent:#3b82f6;
+    --bg:#0e1117; --panel:#161b22; --panel2:#1c2330; --line:#2a3340; --line2:#39455a;
+    --txt:#e6edf3; --mut:#8b98a8; --dim:#5c6b7e;
+    --calm:#2ea043; --watch:#d4a017; --warn:#e8731c; --acute:#e5484d; --ref:#4b8bf4;
     --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --s:8px;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--txt);
-    font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-  a{color:var(--accent)}
-  .wrap{max-width:1080px;margin:0 auto;padding:24px 18px 80px}
-  header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;
-    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:22px}
-  h1{font-size:20px;margin:0;letter-spacing:.2px}
-  h1 small{color:var(--mut);font-weight:400;font-size:13px;display:block;margin-top:3px}
-  .stamp{color:var(--mut);font:12px/1.4 var(--mono);text-align:right}
+    font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:var(--ref);text-decoration:none}
+  .wrap{max-width:1120px;margin:0 auto;padding:22px 16px 90px}
+  header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;
+    border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}
+  h1{font-size:19px;margin:0;letter-spacing:.2px}
+  h1 small{color:var(--mut);font-weight:400;font-size:12.5px;display:block;margin-top:4px}
+  .stamp{color:var(--mut);font:11.5px/1.5 var(--mono);text-align:right}
   .grid{display:grid;gap:14px}
-  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
-  .panel h2{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);
-    margin:0 0 12px;font-weight:600}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:15px}
+  .panel h2{font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--mut);
+    margin:0 0 12px;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+  .panel h2 .sub{font-weight:400;letter-spacing:0;text-transform:none;font-size:11px;color:var(--dim)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  @media(max-width:840px){.two,.three{grid-template-columns:1fr}}
 
   /* hero */
-  .hero{display:grid;grid-template-columns:200px 1fr;gap:20px;align-items:center}
-  .gauge{text-align:center}
-  .gauge .num{font:700 56px/1 var(--mono)}
-  .gauge .pm{color:var(--mut);font:13px/1 var(--mono);margin-top:4px}
-  .gauge .lbl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-top:8px}
-  .stance{font-size:13px}
-  .stance .tag{display:inline-block;padding:5px 12px;border-radius:999px;font-weight:700;
-    font-size:14px;letter-spacing:.02em;margin-bottom:8px}
-  .meta-row{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font:12px/1.5 var(--mono);margin-top:10px}
-  .meta-row b{color:var(--txt)}
+  .hero{display:grid;grid-template-columns:230px 1fr;gap:22px}
+  @media(max-width:680px){.hero{grid-template-columns:1fr}}
+  .score{font:700 60px/.9 var(--mono)}
+  .score small{font-size:15px;color:var(--mut);font-weight:400}
+  .scorelbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut);margin:6px 0 10px}
+  .tag{display:inline-block;padding:4px 11px;border-radius:6px;font-weight:700;font-size:13px}
+  .ladder{margin-top:12px}
+  .ladder .track{position:relative;height:26px;border-radius:5px;overflow:hidden;display:flex}
+  .ladder .seg{height:100%;font:10px var(--mono);color:#0e1117cc;display:flex;align-items:center;
+    justify-content:center;font-weight:700}
+  .ladder .pin{position:absolute;top:-3px;width:2px;height:32px;background:#fff;box-shadow:0 0 4px #000}
+  .ladder .pin::after{content:attr(data-v);position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+    font:700 11px var(--mono);color:#fff;white-space:nowrap}
+  .ladder .scale{display:flex;justify-content:space-between;font:9.5px var(--mono);color:var(--dim);margin-top:3px}
+  .interp{font-size:14px;line-height:1.55;margin:2px 0 12px}
+  .regime{font-size:12px;color:var(--mut);margin-bottom:12px}
+  .regime b{color:var(--txt)}
+  .stchips{display:flex;gap:10px;flex-wrap:wrap}
+  .stchip{flex:1;min-width:150px;background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px}
+  .stchip .l{font-size:11px;color:var(--mut)}
+  .stchip .v{font:700 20px var(--mono)}
+  .stchip .d{font-size:10.5px;color:var(--dim);margin-top:2px}
+  .stchip .mini{height:4px;border-radius:3px;background:#0d1420;margin-top:6px;overflow:hidden}
+  .stchip .mini>span{display:block;height:100%}
 
-  .twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  @media(max-width:780px){.hero{grid-template-columns:1fr}.twocol{grid-template-columns:1fr}}
+  .metrow{display:flex;gap:16px;flex-wrap:wrap;color:var(--mut);font:11.5px/1.5 var(--mono);margin-top:8px}
+  .metrow b{color:var(--txt)}
+  .link{cursor:pointer;border-bottom:1px dashed var(--line2)}
 
-  /* bars */
-  .bar{height:7px;border-radius:4px;background:var(--panel2);overflow:hidden}
-  .bar>span{display:block;height:100%}
-  .bucket{margin-bottom:14px}
-  .bucket:last-child{margin-bottom:0}
-  .bucket .top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-  .bucket .top .n{font-weight:600;font-size:13px}
-  .bucket .top .s{font:700 14px var(--mono)}
-  .bucket .w{color:var(--mut);font:11px var(--mono)}
+  /* freshness */
+  .fresh{display:flex;gap:10px;flex-wrap:wrap;align-items:center;font-size:12px}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:var(--panel2);border:1px solid var(--line);
+    border-radius:999px;padding:4px 11px;font:11.5px var(--mono);color:var(--mut)}
+  .chip b{color:var(--txt)}
+  .dot{width:8px;height:8px;border-radius:50%}
 
-  /* tripwires */
-  .tw{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13px}
-  .tw:last-child{border-bottom:0}
-  .tw .box{font:700 13px var(--mono);width:22px;flex:none}
-  .tw .body{flex:1}
-  .tw .meaning{color:var(--mut);font-size:12px}
-  .tw .val{font:12px var(--mono);color:var(--mut);white-space:nowrap}
-  .tw.hit .box{color:var(--acute)} .tw.hit{background:rgba(229,72,77,.06)}
-  .tw.ok .box{color:var(--calm)} .tw.na .box{color:var(--mut)}
+  /* bars / gauges */
+  .bar{height:7px;border-radius:4px;background:#0d1420;overflow:hidden}
+  .bar>span{display:block;height:100%;border-radius:4px}
+  .dtt{padding:9px 0;border-bottom:1px solid var(--line)}
+  .dtt:last-child{border-bottom:0}
+  .dtt .row1{display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:5px}
+  .dtt .nm{font-weight:600;font-size:13px}
+  .dtt .nm .pct{font:11px var(--mono);color:var(--mut);font-weight:400;margin-left:6px}
+  .dtt .vals{font:11px var(--mono);color:var(--mut);white-space:nowrap}
+  .dtt .gtrack{position:relative;height:9px;border-radius:5px;background:#0d1420;overflow:hidden}
+  .dtt .gtrack>span{display:block;height:100%}
+  .dtt .note{font-size:11px;color:var(--dim);margin-top:4px}
+  .dtt.tripped{background:rgba(229,72,77,.06);border-radius:6px;padding-left:8px;padding-right:8px}
 
   /* defeaters */
-  .def{display:flex;justify-content:space-between;gap:10px;padding:6px 0;font-size:13px;border-bottom:1px solid var(--line)}
+  .def{display:flex;justify-content:space-between;gap:10px;padding:7px 0;font-size:13px;border-bottom:1px solid var(--line)}
   .def:last-child{border-bottom:0}
-  .def .b{color:var(--mut);font-size:11px}
+  .def .b{color:var(--dim);font-size:11px}
 
-  /* indicator table */
-  table{width:100%;border-collapse:collapse;font-size:13px}
-  th{text-align:left;color:var(--mut);font-weight:600;font-size:11px;letter-spacing:.05em;
-    text-transform:uppercase;padding:6px 8px;border-bottom:1px solid var(--line)}
+  /* buckets */
+  .bk{margin-bottom:12px}.bk:last-child{margin-bottom:0}
+  .bk .t{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
+  .bk .t .n{font-weight:600;font-size:13px}.bk .t .s{font:700 14px var(--mono)}
+  .bk .w{color:var(--dim);font:10.5px var(--mono)}
+
+  /* table */
+  .tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+  select,button.btn{background:var(--panel2);color:var(--txt);border:1px solid var(--line2);border-radius:7px;
+    padding:6px 10px;font:12px var(--mono);cursor:pointer}
+  .tblwrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
+  th{text-align:left;color:var(--mut);font-weight:600;font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:6px 8px;border-bottom:1px solid var(--line);cursor:pointer;white-space:nowrap}
+  th.sorted{color:var(--ref)}
   td{padding:7px 8px;border-bottom:1px solid var(--panel2);vertical-align:middle}
-  td.num{font:13px var(--mono);text-align:right;white-space:nowrap}
-  .grp td{background:var(--panel2);font-weight:600;font-size:12px;letter-spacing:.04em}
-  .badge{display:inline-block;padding:1px 7px;border-radius:5px;font:11px var(--mono);
+  td.num{font:12.5px var(--mono);text-align:right;white-space:nowrap}
+  .badge{display:inline-block;padding:1px 6px;border-radius:5px;font:10.5px var(--mono);
     background:var(--panel2);color:var(--mut);border:1px solid var(--line)}
-  .badge.pct{color:#9bd}.badge.anc{color:#cba}.badge.der{color:#ac9}
+  .badge.pct{color:#86b7ff}.badge.anc{color:#e3c08a}.badge.der{color:#9ad6a6}
   .scorecell{display:flex;align-items:center;gap:8px;justify-content:flex-end}
-  .scorecell .bar{width:64px}
-  .stale{color:var(--watch)}
-  .context{display:flex;gap:24px;flex-wrap:wrap;font:13px var(--mono)}
-  .context .c span{color:var(--mut)}
-  .note{color:var(--mut);font-size:12px;margin-top:6px}
-  footer{margin-top:26px;color:var(--mut);font-size:12px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px}
+  .scorecell .bar{width:60px}
+  .arrow{font-weight:700}.up{color:var(--acute)}.down{color:var(--calm)}.flat{color:var(--dim)}
+
+  /* fwd returns / waterfall / prob */
+  .ft{width:100%;border-collapse:collapse;font-size:12.5px}
+  .ft th,.ft td{padding:6px 6px;border-bottom:1px solid var(--panel2);text-align:right}
+  .ft th:first-child,.ft td:first-child{text-align:left}
+  .ft td.cur{background:rgba(75,139,244,.12)}
+  .wf .row{display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12.5px}
+  .wf .row .lab{width:120px;color:var(--mut);flex:none}
+  .wf .row .barwrap{flex:1;background:#0d1420;border-radius:4px;height:16px;overflow:hidden}
+  .wf .row .barwrap>span{display:block;height:100%}
+  .wf .row .v{width:42px;text-align:right;font:12px var(--mono)}
+  .prob .p{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+  .prob .p:last-child{border-bottom:0}
+  .prob .pv{font:700 18px var(--mono)}
+  .prob .pn{font-size:11px;color:var(--dim)}
+
+  /* analogs */
+  .ana{display:flex;flex-direction:column;gap:8px}
+  .ana .a{display:flex;align-items:center;gap:10px}
+  .ana .a .yr{width:64px;font:13px var(--mono)}
+  .ana .a .barwrap{flex:1;background:#0d1420;border-radius:4px;height:14px;overflow:hidden}
+  .ana .a .barwrap>span{display:block;height:100%;background:var(--ref)}
+  .ana .a .s{width:40px;text-align:right;font:12px var(--mono);color:var(--mut)}
+
+  .note{color:var(--dim);font-size:11.5px;margin-top:8px;line-height:1.5}
+  .caveat{background:rgba(75,139,244,.07);border:1px solid #284060;border-radius:7px;padding:9px 11px;
+    font-size:11.5px;color:#a9c4e6;margin-top:10px;line-height:1.5}
+  footer{margin-top:24px;color:var(--mut);font-size:11.5px;line-height:1.6;border-top:1px solid var(--line);padding-top:14px}
   .err{background:#3a1d1d;border:1px solid var(--acute);padding:16px;border-radius:8px}
+
+  /* tooltip */
+  .tip{position:relative;border-bottom:1px dotted var(--line2);cursor:help}
+  .tip:hover::after{content:attr(data-tip);position:absolute;left:0;bottom:140%;z-index:20;width:230px;
+    background:#0a0e14;border:1px solid var(--line2);border-radius:7px;padding:8px 10px;font:11.5px/1.45 system-ui;
+    color:var(--txt);box-shadow:0 6px 22px #000a;white-space:normal}
+
+  /* methodology drawer */
+  .drawer{position:fixed;top:0;right:0;height:100%;width:min(460px,92vw);background:#0c1119;
+    border-left:1px solid var(--line2);box-shadow:-12px 0 40px #000a;transform:translateX(100%);
+    transition:transform .25s ease;z-index:50;overflow-y:auto;padding:20px}
+  .drawer.open{transform:none}
+  .drawer h3{margin:0 0 4px;font-size:16px}.drawer h4{margin:16px 0 5px;font-size:12px;color:var(--ref);
+    text-transform:uppercase;letter-spacing:.08em}
+  .drawer p,.drawer li{font-size:12.5px;color:var(--mut);line-height:1.6}
+  .drawer .x{position:absolute;top:14px;right:16px;cursor:pointer;color:var(--mut);font-size:20px}
+  .scrim{position:fixed;inset:0;background:#000a;opacity:0;pointer-events:none;transition:opacity .25s;z-index:40}
+  .scrim.open{opacity:1;pointer-events:auto}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <h1>India Recession / Bubble-Risk Dashboard
-      <small>5-bucket stress composite · percentile + anchor scoring · backtested 2008 / 2013 / 2018</small>
+    <h1>India Macro Risk Dashboard
+      <small>Three stress lenses — <span style="color:#9ad6a6">recession</span> ·
+        <span style="color:#e3c08a">credit / currency</span> ·
+        <span style="color:#f2a25c">asset-bubble</span> — on a backtested 5-bucket composite</small>
     </h1>
     <div class="stamp" id="stamp">loading…</div>
   </header>
-
   <div id="app" class="grid"></div>
-
   <footer id="footer"></footer>
+</div>
+
+<div class="scrim" id="scrim" onclick="drawer(false)"></div>
+<div class="drawer" id="drawer">
+  <span class="x" onclick="drawer(false)">✕</span>
+  <div id="drawerbody"></div>
 </div>
 
 <!-- Build-time data snapshot. build.py injects fresh JSON here so the page also works
      when opened directly from disk (file://), where fetch('data.json') is blocked by the
      browser. Served over HTTP (GitHub Pages) the live fetch wins and this is only a fallback. -->
 <script id="bootstrap-data" type="application/json">
-{"generated":"2026-06-14T12:36:09+00:00","composite":29.2,"composite_raw":47.6,"margin":6.9,"breadth":0.23,"coverage":1.0,"n_live":22,"n_total":22,"verdict":{"label":"NO CRISIS SIGNAL","stance":"Thesis NOT supported by current data.","tripped":0},"buckets":[{"key":"valuation","label":"Valuation","score":56.7,"weight":0.25,"weight_used":0.25,"indicators":[{"key":"nifty_pe","name":"Nifty 50 trailing PE","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":22.4,"score":44.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"nifty_pb","name":"Nifty 50 PB ratio","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":3.6,"score":40.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"buffett_in","name":"Buffett Indicator (mcap/GDP %)","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":116.0,"score":52.5,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"ey_gsec_gap","name":"Earnings yield - 10Y G-sec (pp)","bucket":"valuation","bucket_label":"Valuation","direction":"low","source":"derived","method":"derived","current":-2.1557,"score":90.2,"ok":true,"stale":false,"age_days":null,"date":null}]},{"key":"external_currency","label":"External / Currency","score":60.4,"weight":0.25,"weight_used":0.25,"indicators":[{"key":"usdinr_12m","name":"USD/INR 12-month % move","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":11.2863,"score":86.2,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"fx_reserves_8w","name":"FX reserves 8-week change %","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":0.8,"score":9.3,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"fii_3m","name":"FII net equity, rolling 3m (Rs cr)","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":-14200.0,"score":57.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"brent_inr","name":"Brent crude, INR-adjusted","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":8305.083,"score":96.2,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"trade_deficit","name":"Trade deficit trend (USD bn/mo)","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"manual","method":"anchor","current":22.5,"score":53.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"}]},{"key":"macro_stress","label":"Macro Stress","score":15.6,"weight":0.2,"weight_used":0.2,"indicators":[{"key":"gsec_10y","name":"India 10Y G-sec yield (%)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":6.62,"score":7.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"gsec_repo_sprd","name":"10Y minus repo spread (pp)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"derived","method":"derived","current":0.12,"score":0.0,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"cpi_gap","name":"CPI vs RBI 4% target (pp above)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":0.7,"score":23.3,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"iip","name":"IIP growth (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":3.8,"score":27.5,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"gst_yoy","name":"GST collections (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":9.2,"score":20.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"}]},{"key":"domestic_flows","label":"Domestic Flows / Leverage","score":47.8,"weight":0.15,"weight_used":0.15,"indicators":[{"key":"sip_inflows","name":"Monthly SIP inflows (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"low","source":"manual","method":"anchor","current":26800.0,"score":0.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"fno_cash_ratio","name":"F&O / cash turnover ratio","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":285.0,"score":74.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"mtf_book","name":"MTF (margin funding) book (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":79000.0,"score":78.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"demat_growth","name":"Demat account growth (% YoY)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":21.0,"score":39.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"}]},{"key":"sentiment_froth","label":"Sentiment / Froth","score":53.5,"weight":0.15,"weight_used":0.15,"indicators":[{"key":"india_vix","name":"India VIX","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"anchor","current":14.7175,"score":20.9,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"adv_decl","name":"Advance-decline ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"low","source":"manual","method":"anchor","current":1.05,"score":35.7,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"sme_ipo_gains","name":"SME IPO avg listing gain (%)","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"manual","method":"anchor","current":78.0,"score":58.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"smallcap_ratio","name":"Midcap / largecap index ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"percentile","current":2.9635,"score":99.6,"ok":true,"stale":false,"age_days":null,"date":null}]}],"tripwires":[{"name":"USD/INR","level":100,"unit":"","trips_when":"above","note":"rupee crisis zone (tuned from 90; spot ~96)","value":95.1,"tripped":false},{"name":"FII 3m net flows","level":-50000,"unit":" cr","trips_when":"below","note":"capital flight","value":-14200.0,"tripped":false},{"name":"FX reserves 8wk %","level":-5,"unit":"%","trips_when":"below","note":"reserve drain / RBI defending hard","value":0.8,"tripped":false},{"name":"India 10Y G-sec","level":7.8,"unit":"%","trips_when":"above","note":"bond market stress","value":6.62,"tripped":false},{"name":"India VIX","level":25,"unit":"","trips_when":"above","note":"volatility regime break","value":14.7175,"tripped":false},{"name":"CPI (% above 4%)","level":2.5,"unit":"pp","trips_when":"above","note":"inflation out of RBI band (6.5% CPI)","value":0.7,"tripped":false},{"name":"Brent crude (USD)","level":100,"unit":"","trips_when":"above","note":"oil import shock","value":87.33,"tripped":false}],"defeaters":[{"name":"10Y minus repo spread (pp)","score":0.0,"bucket_label":"Macro Stress"},{"name":"Monthly SIP inflows (Rs cr)","score":0.0,"bucket_label":"Domestic Flows / Leverage"},{"name":"India 10Y G-sec yield (%)","score":7.1,"bucket_label":"Macro Stress"},{"name":"FX reserves 8-week change %","score":9.3,"bucket_label":"External / Currency"},{"name":"GST collections (% YoY)","score":20.0,"bucket_label":"Macro Stress"},{"name":"India VIX","score":20.9,"bucket_label":"Sentiment / Froth"}],"indicators":[{"key":"nifty_pe","name":"Nifty 50 trailing PE","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":22.4,"score":44.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"nifty_pb","name":"Nifty 50 PB ratio","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":3.6,"score":40.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"buffett_in","name":"Buffett Indicator (mcap/GDP %)","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":116.0,"score":52.5,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"ey_gsec_gap","name":"Earnings yield - 10Y G-sec (pp)","bucket":"valuation","bucket_label":"Valuation","direction":"low","source":"derived","method":"derived","current":-2.1557,"score":90.2,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"usdinr_12m","name":"USD/INR 12-month % move","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":11.2863,"score":86.2,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"fx_reserves_8w","name":"FX reserves 8-week change %","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":0.8,"score":9.3,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"fii_3m","name":"FII net equity, rolling 3m (Rs cr)","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":-14200.0,"score":57.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"brent_inr","name":"Brent crude, INR-adjusted","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":8305.083,"score":96.2,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"trade_deficit","name":"Trade deficit trend (USD bn/mo)","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"manual","method":"anchor","current":22.5,"score":53.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"gsec_10y","name":"India 10Y G-sec yield (%)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":6.62,"score":7.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"gsec_repo_sprd","name":"10Y minus repo spread (pp)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"derived","method":"derived","current":0.12,"score":0.0,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"cpi_gap","name":"CPI vs RBI 4% target (pp above)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":0.7,"score":23.3,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"iip","name":"IIP growth (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":3.8,"score":27.5,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"gst_yoy","name":"GST collections (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":9.2,"score":20.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"sip_inflows","name":"Monthly SIP inflows (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"low","source":"manual","method":"anchor","current":26800.0,"score":0.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"fno_cash_ratio","name":"F&O / cash turnover ratio","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":285.0,"score":74.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"mtf_book","name":"MTF (margin funding) book (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":79000.0,"score":78.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"demat_growth","name":"Demat account growth (% YoY)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":21.0,"score":39.1,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"india_vix","name":"India VIX","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"anchor","current":14.7175,"score":20.9,"ok":true,"stale":false,"age_days":null,"date":null},{"key":"adv_decl","name":"Advance-decline ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"low","source":"manual","method":"anchor","current":1.05,"score":35.7,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"sme_ipo_gains","name":"SME IPO avg listing gain (%)","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"manual","method":"anchor","current":78.0,"score":58.0,"ok":true,"stale":false,"age_days":14,"date":"2026-05-31"},{"key":"smallcap_ratio","name":"Midcap / largecap index ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"percentile","current":2.9635,"score":99.6,"ok":true,"stale":false,"age_days":null,"date":null}],"context":[{"ticker":"^NSEI","name":"Nifty 50","value":23622.9004,"chg_12m":-7.4231},{"ticker":"^NSEBANK","name":"Bank Nifty","value":56814.8008,"chg_12m":-0.8688}],"danger":["Earnings yield - 10Y G-sec (pp)","USD/INR 12-month % move","Brent crude, INR-adjusted","MTF (margin funding) book (Rs cr)","Midcap / largecap index ratio"],"stale":[],"missing_buckets":[],"audit_problems":[],"meta":{"weights":{"valuation":0.25,"external_currency":0.25,"macro_stress":0.2,"domestic_flows":0.15,"sentiment_froth":0.15},"bands":{"benign":50,"watch":58,"warning":65,"acute":75},"danger_zone":75,"floor":0.5,"anchor_switch_n":24}}
+{"trajectory":{"points":[{"d":"2008-01","v":10.5},{"d":"2008-02","v":11.5},{"d":"2008-03","v":13.8},{"d":"2008-04","v":55.6},{"d":"2008-05","v":89.6},{"d":"2008-06","v":95.6},{"d":"2008-07","v":91.5},{"d":"2008-08","v":98.6},{"d":"2008-09","v":98.6},{"d":"2008-10","v":98.7},{"d":"2008-11","v":97.4},{"d":"2008-12","v":96.2},{"d":"2009-01","v":96.2},{"d":"2009-02","v":98.8},{"d":"2009-03","v":97.6},{"d":"2009-04","v":58.2},{"d":"2009-05","v":61.1},{"d":"2009-06","v":64.0},{"d":"2009-07","v":65.4},{"d":"2009-08","v":63.9},{"d":"2009-09","v":45.2},{"d":"2009-10","v":41.8},{"d":"2009-11","v":40.3},{"d":"2009-12","v":41.8},{"d":"2010-01","v":37.1},{"d":"2010-02","v":38.8},{"d":"2010-03","v":33.2},{"d":"2010-04","v":35.4},{"d":"2010-05","v":49.3},{"d":"2010-06","v":36.0},{"d":"2010-07","v":38.3},{"d":"2010-08","v":36.6},{"d":"2010-09","v":43.6},{"d":"2010-10","v":37.9},{"d":"2010-11","v":42.4},{"d":"2010-12","v":34.2},{"d":"2011-01","v":53.5},{"d":"2011-02","v":53.4},{"d":"2011-03","v":52.8},{"d":"2011-04","v":45.1},{"d":"2011-05","v":49.7},{"d":"2011-06","v":36.4},{"d":"2011-07","v":36.6},{"d":"2011-08","v":55.1},{"d":"2011-09","v":71.6},{"d":"2011-10","v":67.4},{"d":"2011-11","v":74.7},{"d":"2011-12","v":73.0},{"d":"2012-01","v":71.2},{"d":"2012-02","v":73.2},{"d":"2012-03","v":71.6},{"d":"2012-04","v":58.2},{"d":"2012-05","v":75.9},{"d":"2012-06","v":54.4},{"d":"2012-07","v":52.0},{"d":"2012-08","v":54.8},{"d":"2012-09","v":41.4},{"d":"2012-10","v":49.2},{"d":"2012-11","v":42.7},{"d":"2012-12","v":51.7},{"d":"2013-01","v":48.2},{"d":"2013-02","v":52.3},{"d":"2013-03","v":40.9},{"d":"2013-04","v":45.7},{"d":"2013-05","v":48.0},{"d":"2013-06","v":42.5},{"d":"2013-07","v":55.4},{"d":"2013-08","v":73.9},{"d":"2013-09","v":76.4},{"d":"2013-10","v":54.7},{"d":"2013-11","v":61.7},{"d":"2013-12","v":64.8},{"d":"2014-01","v":54.4},{"d":"2014-02","v":50.4},{"d":"2014-03","v":48.9},{"d":"2014-04","v":73.8},{"d":"2014-05","v":52.0},{"d":"2014-06","v":52.6},{"d":"2014-07","v":43.6},{"d":"2014-08","v":35.5},{"d":"2014-09","v":31.8},{"d":"2014-10","v":30.6},{"d":"2014-11","v":27.3},{"d":"2014-12","v":30.2},{"d":"2015-01","v":29.3},{"d":"2015-02","v":29.0},{"d":"2015-03","v":28.7},{"d":"2015-04","v":36.1},{"d":"2015-05","v":37.3},{"d":"2015-06","v":36.4},{"d":"2015-07","v":30.1},{"d":"2015-08","v":50.9},{"d":"2015-09","v":33.4},{"d":"2015-10","v":31.8},{"d":"2015-11","v":32.4},{"d":"2015-12","v":25.1},{"d":"2016-01","v":38.2},{"d":"2016-02","v":42.0},{"d":"2016-03","v":29.1},{"d":"2016-04","v":28.8},{"d":"2016-05","v":28.4},{"d":"2016-06","v":30.7},{"d":"2016-07","v":24.4},{"d":"2016-08","v":22.0},{"d":"2016-09","v":27.0},{"d":"2016-10","v":24.3},{"d":"2016-11","v":30.2},{"d":"2016-12","v":32.5},{"d":"2017-01","v":31.9},{"d":"2017-02","v":26.3},{"d":"2017-03","v":22.6},{"d":"2017-04","v":20.9},{"d":"2017-05","v":18.3},{"d":"2017-06","v":17.0},{"d":"2017-07","v":20.9},{"d":"2017-08","v":20.4},{"d":"2017-09","v":27.0},{"d":"2017-10","v":26.6},{"d":"2017-11","v":25.8},{"d":"2017-12","v":25.6},{"d":"2018-01","v":28.2},{"d":"2018-02","v":29.5},{"d":"2018-03","v":34.9},{"d":"2018-04","v":34.4},{"d":"2018-05","v":35.7},{"d":"2018-06","v":38.4},{"d":"2018-07","v":38.5},{"d":"2018-08","v":49.1},{"d":"2018-09","v":63.9},{"d":"2018-10","v":57.0},{"d":"2018-11","v":48.4},{"d":"2018-12","v":44.2},{"d":"2019-01","v":47.9},{"d":"2019-02","v":48.8},{"d":"2019-03","v":30.2},{"d":"2019-04","v":40.4},{"d":"2019-05","v":26.0},{"d":"2019-06","v":23.9},{"d":"2019-07","v":22.6},{"d":"2019-08","v":24.3},{"d":"2019-09","v":21.4},{"d":"2019-10","v":21.0},{"d":"2019-11","v":24.0},{"d":"2019-12","v":21.8},{"d":"2020-01","v":24.3},{"d":"2020-02","v":33.9},{"d":"2020-03","v":60.9},{"d":"2020-04","v":34.6},{"d":"2020-05","v":44.0},{"d":"2020-06","v":53.2},{"d":"2020-07","v":44.9},{"d":"2020-08","v":30.9},{"d":"2020-09","v":22.6},{"d":"2020-10","v":31.6},{"d":"2020-11","v":20.5},{"d":"2020-12","v":26.7},{"d":"2021-01","v":37.3},{"d":"2021-02","v":40.9},{"d":"2021-03","v":25.4},{"d":"2021-04","v":36.8},{"d":"2021-05","v":23.5},{"d":"2021-06","v":37.1},{"d":"2021-07","v":38.8},{"d":"2021-08","v":33.9},{"d":"2021-09","v":38.8},{"d":"2021-10","v":39.0},{"d":"2021-11","v":40.0},{"d":"2021-12","v":37.8},{"d":"2022-01","v":55.5},{"d":"2022-02","v":58.3},{"d":"2022-03","v":45.2},{"d":"2022-04","v":56.1},{"d":"2022-05","v":48.1},{"d":"2022-06","v":57.7},{"d":"2022-07","v":45.5},{"d":"2022-08","v":68.8},{"d":"2022-09","v":71.2},{"d":"2022-10","v":54.8},{"d":"2022-11","v":49.7},{"d":"2022-12","v":52.6},{"d":"2023-01","v":51.7},{"d":"2023-02","v":49.2},{"d":"2023-03","v":37.9},{"d":"2023-04","v":35.8},{"d":"2023-05","v":33.9},{"d":"2023-06","v":31.4},{"d":"2023-07","v":32.6},{"d":"2023-08","v":33.7},{"d":"2023-09","v":32.2},{"d":"2023-10","v":31.6},{"d":"2023-11","v":30.6},{"d":"2023-12","v":25.5},{"d":"2024-01","v":31.0},{"d":"2024-02","v":28.9},{"d":"2024-03","v":28.5},{"d":"2024-04","v":29.4},{"d":"2024-05","v":44.5},{"d":"2024-06","v":28.9},{"d":"2024-07","v":27.1},{"d":"2024-08","v":26.2},{"d":"2024-09","v":24.8},{"d":"2024-10","v":26.6},{"d":"2024-11","v":26.1},{"d":"2024-12","v":30.1},{"d":"2025-01","v":33.2},{"d":"2025-02","v":31.4},{"d":"2025-03","v":27.1},{"d":"2025-04","v":21.5},{"d":"2025-05","v":21.1},{"d":"2025-06","v":18.1},{"d":"2025-07","v":28.2},{"d":"2025-08","v":21.9},{"d":"2025-09","v":22.1},{"d":"2025-10","v":21.1},{"d":"2025-11","v":20.4},{"d":"2025-12","v":19.0},{"d":"2026-01","v":31.3},{"d":"2026-02","v":29.4},{"d":"2026-03","v":66.0},{"d":"2026-04","v":52.7},{"d":"2026-05","v":49.7},{"d":"2026-06","v":48.6}],"bands":[{"label":"GFC 2008","start":"2008-09","end":"2009-03"},{"label":"Taper 2013","start":"2013-05","end":"2013-12"},{"label":"NBFC 2018","start":"2018-08","end":"2019-02"},{"label":"COVID 2020","start":"2020-02","end":"2020-05"}],"thresholds":{"benign":50,"watch":58,"warning":65,"acute":75}},"distance_to_trip":[{"name":"USD/INR","current":94.71499633789062,"floor":83,"level":100,"unit":"","trips_when":"above","note":"rupee crisis zone (tuned from 90; spot ~96)","fill":0.689,"tripped":false},{"name":"FII 3m net flows","current":-14200.0,"floor":20000,"level":-50000,"unit":" cr","trips_when":"below","note":"capital flight","fill":0.489,"tripped":false},{"name":"FX reserves 8wk %","current":0.8,"floor":1.5,"level":-5,"unit":"%","trips_when":"below","note":"reserve drain / RBI defending hard","fill":0.108,"tripped":false},{"name":"India 10Y G-sec","current":6.62,"floor":6.0,"level":7.8,"unit":"%","trips_when":"above","note":"bond market stress","fill":0.344,"tripped":false},{"name":"India VIX","current":14.24250030517578,"floor":11,"level":25,"unit":"","trips_when":"above","note":"volatility regime break","fill":0.232,"tripped":false},{"name":"CPI (% above 4%)","current":0.7,"floor":0,"level":2.5,"unit":"pp","trips_when":"above","note":"inflation out of RBI band (6.5% CPI)","fill":0.28,"tripped":false},{"name":"Brent crude (USD)","current":82.97000122070312,"floor":65,"level":100,"unit":"","trips_when":"above","note":"oil import shock","fill":0.513,"tripped":false}],"forward_returns":[{"band":"0-30","n":56,"avg_fwd_12m":3.9,"worst":-47.1,"best":56.6,"p_down20":7},{"band":"30-50","n":94,"avg_fwd_12m":11.3,"worst":-26.0,"best":62.7,"p_down20":2},{"band":"50-70","n":38,"avg_fwd_12m":16.6,"worst":-32.8,"best":70.9,"p_down20":3},{"band":"70-+","n":22,"avg_fwd_12m":32.8,"worst":-8.6,"best":82.7,"p_down20":0}],"fwd_note":"Market-core stress is CONTRARIAN at extremes in India: the 70+ readings are the 2008/2013 capitulation lows, which preceded rebounds \u2014 high composite is NOT a sell signal here. The asset-bubble lens (valuations/froth), not the composite, is the 'expensive' warning.","analogs":[{"period":"2012-12","similarity":90},{"period":"2013-12","similarity":90},{"period":"2014-05","similarity":87},{"period":"2018-06","similarity":85}],"regime":{"label":"Late-cycle / asset-froth","why":"valuations & froth elevated while growth stays resilient","slope_3m":-17.4},"stress_types":[{"key":"recession","label":"Recession risk","score":25,"desc":"growth & demand \u2014 IIP, GST, yields, credit"},{"key":"credit","label":"Credit / currency stress","score":45,"desc":"rupee, FII flows, reserves, oil, bonds"},{"key":"bubble","label":"Asset-bubble stress","score":53,"desc":"valuations, froth, retail leverage"}],"interpretation":"India's dominant risk right now is asset-valuation stress (moderate, 53/100), while recession risk stays low (25/100). This is a froth setup, not a recession setup \u2014 valuation risk \u2260 recession risk. No acute trip-wires are firing.","probabilities":[{"label":"Sharp drawdown >20% (12m)","pct":2,"note":"empirical, composite 30-50 band, n=94"},{"label":"Positive 12m index return","pct":83,"note":"complement of large-drawdown frequency"},{"label":"Avg outcome","pct":null,"note":"+11% mean fwd 12m"}],"contributions":[{"key":"valuation","label":"Valuation","contribution":14.175},{"key":"external_currency","label":"External / Currency","contribution":14.45},{"key":"macro_stress","label":"Macro Stress","contribution":3.12},{"key":"domestic_flows","label":"Domestic Flows / Leverage","contribution":7.17},{"key":"sentiment_froth","label":"Sentiment / Froth","contribution":7.89}],"freshness":{"coverage":1.0,"n_live":22,"n_total":22,"stale_count":0,"margin":6.9,"market_asof":"2026-06-15","manual_oldest":"2026-05-31","manual_newest":"2026-05-31","confidence":[{"source":"derived","n":2,"pct":80},{"source":"manual","n":16,"pct":70},{"source":"market","n":4,"pct":95}]},"generated":"2026-06-15T10:12:08+00:00","composite":28.7,"composite_raw":46.8,"margin":6.9,"breadth":0.23,"coverage":1.0,"n_live":22,"n_total":22,"verdict":{"label":"NO CRISIS SIGNAL","stance":"Thesis NOT supported by current data.","tripped":0},"buckets":[{"key":"valuation","label":"Valuation","score":56.7,"weight":0.25,"weight_used":0.25,"indicators":[{"key":"nifty_pe","name":"Nifty 50 trailing PE","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":22.4,"score":44.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"nifty_pb","name":"Nifty 50 PB ratio","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":3.6,"score":40.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"buffett_in","name":"Buffett Indicator (mcap/GDP %)","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":116.0,"score":52.5,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"ey_gsec_gap","name":"Earnings yield - 10Y G-sec (pp)","bucket":"valuation","bucket_label":"Valuation","direction":"low","source":"derived","method":"derived","current":-2.1557,"score":90.2,"ok":true,"stale":false,"age_days":null,"date":null,"spark":null,"trend":null}]},{"key":"external_currency","label":"External / Currency","score":57.8,"weight":0.25,"weight_used":0.25,"indicators":[{"key":"usdinr_12m","name":"USD/INR 12-month % move","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":7.9809,"score":75.0,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[44.9,41.4,37.0,40.2,42.1,59.8,59.9,64.6,50.8,47.8,52.4,49.8,62.9,64.7,68.0,65.7,66.3,60.9,67.7,58.0,85.5,87.5,86.0,89.6],"trend":4.1},{"key":"fx_reserves_8w","name":"FX reserves 8-week change %","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":0.8,"score":9.3,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"fii_3m","name":"FII net equity, rolling 3m (Rs cr)","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":-14200.0,"score":57.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"brent_inr","name":"Brent crude, INR-adjusted","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":7858.5034,"score":94.7,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[85.0,83.8,83.5,75.3,76.0,77.1,84.4,78.8,78.9,57.4,59.8,59.6,77.5,70.9,68.6,65.8,62.8,58.1,81.1,79.9,85.4,99.7,97.9,96.5],"trend":11.1},{"key":"trade_deficit","name":"Trade deficit trend (USD bn/mo)","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"manual","method":"anchor","current":22.5,"score":53.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null}]},{"key":"macro_stress","label":"Macro Stress","score":15.6,"weight":0.2,"weight_used":0.2,"indicators":[{"key":"gsec_10y","name":"India 10Y G-sec yield (%)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":6.62,"score":7.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"gsec_repo_sprd","name":"10Y minus repo spread (pp)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"derived","method":"derived","current":0.12,"score":0.0,"ok":true,"stale":false,"age_days":null,"date":null,"spark":null,"trend":null},{"key":"cpi_gap","name":"CPI vs RBI 4% target (pp above)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":0.7,"score":23.3,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"iip","name":"IIP growth (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":3.8,"score":27.5,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"gst_yoy","name":"GST collections (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":9.2,"score":20.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null}]},{"key":"domestic_flows","label":"Domestic Flows / Leverage","score":47.8,"weight":0.15,"weight_used":0.15,"indicators":[{"key":"sip_inflows","name":"Monthly SIP inflows (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"low","source":"manual","method":"anchor","current":26800.0,"score":0.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"fno_cash_ratio","name":"F&O / cash turnover ratio","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":285.0,"score":74.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"mtf_book","name":"MTF (margin funding) book (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":79000.0,"score":78.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"demat_growth","name":"Demat account growth (% YoY)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":21.0,"score":39.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null}]},{"key":"sentiment_froth","label":"Sentiment / Froth","score":52.6,"weight":0.15,"weight_used":0.15,"indicators":[{"key":"india_vix","name":"India VIX","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"anchor","current":14.2425,"score":17.3,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[9.6,10.7,6.1,27.3,18.7,18.8,32.7,14.7,5.5,47.8,31.4,6.1,0.0,0.0,0.0,1.2,0.0,0.0,12.5,13.1,100.0,49.7,32.2,20.9],"trend":-79.1},{"key":"adv_decl","name":"Advance-decline ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"low","source":"manual","method":"anchor","current":1.05,"score":35.7,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"sme_ipo_gains","name":"SME IPO avg listing gain (%)","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"manual","method":"anchor","current":78.0,"score":58.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"smallcap_ratio","name":"Midcap / largecap index ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"percentile","current":3.0052,"score":99.6,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[5.0,4.4,4.4,6.8,7.3,9.7,10.1,13.9,10.0,6.6,6.1,4.7,6.5,7.9,7.9,4.6,2.8,4.6,6.4,7.7,17.1,13.0,14.7,14.7],"trend":-2.4}]}],"tripwires":[{"name":"USD/INR","level":100,"unit":"","trips_when":"above","note":"rupee crisis zone (tuned from 90; spot ~96)","value":94.715,"tripped":false},{"name":"FII 3m net flows","level":-50000,"unit":" cr","trips_when":"below","note":"capital flight","value":-14200.0,"tripped":false},{"name":"FX reserves 8wk %","level":-5,"unit":"%","trips_when":"below","note":"reserve drain / RBI defending hard","value":0.8,"tripped":false},{"name":"India 10Y G-sec","level":7.8,"unit":"%","trips_when":"above","note":"bond market stress","value":6.62,"tripped":false},{"name":"India VIX","level":25,"unit":"","trips_when":"above","note":"volatility regime break","value":14.2425,"tripped":false},{"name":"CPI (% above 4%)","level":2.5,"unit":"pp","trips_when":"above","note":"inflation out of RBI band (6.5% CPI)","value":0.7,"tripped":false},{"name":"Brent crude (USD)","level":100,"unit":"","trips_when":"above","note":"oil import shock","value":82.97,"tripped":false}],"defeaters":[{"name":"10Y minus repo spread (pp)","score":0.0,"bucket_label":"Macro Stress"},{"name":"Monthly SIP inflows (Rs cr)","score":0.0,"bucket_label":"Domestic Flows / Leverage"},{"name":"India 10Y G-sec yield (%)","score":7.1,"bucket_label":"Macro Stress"},{"name":"FX reserves 8-week change %","score":9.3,"bucket_label":"External / Currency"},{"name":"India VIX","score":17.3,"bucket_label":"Sentiment / Froth"},{"name":"GST collections (% YoY)","score":20.0,"bucket_label":"Macro Stress"}],"indicators":[{"key":"nifty_pe","name":"Nifty 50 trailing PE","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":22.4,"score":44.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"nifty_pb","name":"Nifty 50 PB ratio","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":3.6,"score":40.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"buffett_in","name":"Buffett Indicator (mcap/GDP %)","bucket":"valuation","bucket_label":"Valuation","direction":"high","source":"manual","method":"anchor","current":116.0,"score":52.5,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"ey_gsec_gap","name":"Earnings yield - 10Y G-sec (pp)","bucket":"valuation","bucket_label":"Valuation","direction":"low","source":"derived","method":"derived","current":-2.1557,"score":90.2,"ok":true,"stale":false,"age_days":null,"date":null,"spark":null,"trend":null},{"key":"usdinr_12m","name":"USD/INR 12-month % move","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":7.9809,"score":75.0,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[44.9,41.4,37.0,40.2,42.1,59.8,59.9,64.6,50.8,47.8,52.4,49.8,62.9,64.7,68.0,65.7,66.3,60.9,67.7,58.0,85.5,87.5,86.0,89.6],"trend":4.1},{"key":"fx_reserves_8w","name":"FX reserves 8-week change %","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":0.8,"score":9.3,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"fii_3m","name":"FII net equity, rolling 3m (Rs cr)","bucket":"external_currency","bucket_label":"External / Currency","direction":"low","source":"manual","method":"anchor","current":-14200.0,"score":57.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"brent_inr","name":"Brent crude, INR-adjusted","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"market","method":"percentile","current":7858.5034,"score":94.7,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[85.0,83.8,83.5,75.3,76.0,77.1,84.4,78.8,78.9,57.4,59.8,59.6,77.5,70.9,68.6,65.8,62.8,58.1,81.1,79.9,85.4,99.7,97.9,96.5],"trend":11.1},{"key":"trade_deficit","name":"Trade deficit trend (USD bn/mo)","bucket":"external_currency","bucket_label":"External / Currency","direction":"high","source":"manual","method":"anchor","current":22.5,"score":53.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"gsec_10y","name":"India 10Y G-sec yield (%)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":6.62,"score":7.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"gsec_repo_sprd","name":"10Y minus repo spread (pp)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"derived","method":"derived","current":0.12,"score":0.0,"ok":true,"stale":false,"age_days":null,"date":null,"spark":null,"trend":null},{"key":"cpi_gap","name":"CPI vs RBI 4% target (pp above)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"high","source":"manual","method":"anchor","current":0.7,"score":23.3,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"iip","name":"IIP growth (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":3.8,"score":27.5,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"gst_yoy","name":"GST collections (% YoY)","bucket":"macro_stress","bucket_label":"Macro Stress","direction":"low","source":"manual","method":"anchor","current":9.2,"score":20.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"sip_inflows","name":"Monthly SIP inflows (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"low","source":"manual","method":"anchor","current":26800.0,"score":0.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"fno_cash_ratio","name":"F&O / cash turnover ratio","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":285.0,"score":74.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"mtf_book","name":"MTF (margin funding) book (Rs cr)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":79000.0,"score":78.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"demat_growth","name":"Demat account growth (% YoY)","bucket":"domestic_flows","bucket_label":"Domestic Flows / Leverage","direction":"high","source":"manual","method":"anchor","current":21.0,"score":39.1,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"india_vix","name":"India VIX","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"anchor","current":14.2425,"score":17.3,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[9.6,10.7,6.1,27.3,18.7,18.8,32.7,14.7,5.5,47.8,31.4,6.1,0.0,0.0,0.0,1.2,0.0,0.0,12.5,13.1,100.0,49.7,32.2,20.9],"trend":-79.1},{"key":"adv_decl","name":"Advance-decline ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"low","source":"manual","method":"anchor","current":1.05,"score":35.7,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"sme_ipo_gains","name":"SME IPO avg listing gain (%)","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"manual","method":"anchor","current":78.0,"score":58.0,"ok":true,"stale":false,"age_days":15,"date":"2026-05-31","spark":null,"trend":null},{"key":"smallcap_ratio","name":"Midcap / largecap index ratio","bucket":"sentiment_froth","bucket_label":"Sentiment / Froth","direction":"high","source":"market","method":"percentile","current":3.0052,"score":99.6,"ok":true,"stale":false,"age_days":null,"date":null,"spark":[5.0,4.4,4.4,6.8,7.3,9.7,10.1,13.9,10.0,6.6,6.1,4.7,6.5,7.9,7.9,4.6,2.8,4.6,6.4,7.7,17.1,13.0,14.7,14.7],"trend":-2.4}],"context":[{"ticker":"^NSEI","name":"Nifty 50","value":23853.9004,"chg_12m":-3.692},{"ticker":"^NSEBANK","name":"Bank Nifty","value":57198.8008,"chg_12m":2.2102}],"danger":["Earnings yield - 10Y G-sec (pp)","USD/INR 12-month % move","Brent crude, INR-adjusted","MTF (margin funding) book (Rs cr)","Midcap / largecap index ratio"],"stale":[],"missing_buckets":[],"audit_problems":[],"meta":{"weights":{"valuation":0.25,"external_currency":0.25,"macro_stress":0.2,"domestic_flows":0.15,"sentiment_froth":0.15},"bands":{"benign":50,"watch":58,"warning":65,"acute":75},"danger_zone":75,"floor":0.5,"anchor_switch_n":24}}
 </script>
 
 <script>
-const C = {calm:'#2ea043',watch:'#d4a017',warn:'#e8731c',acute:'#e5484d',mut:'#8b98a8'};
-function scoreColor(s){ if(s==null) return C.mut; if(s<35) return C.calm; if(s<55) return C.watch; if(s<75) return C.warn; return C.acute; }
-function bandColor(v,bands){ if(v<bands.benign) return C.calm; if(v<bands.warning) return C.watch; if(v<bands.acute) return C.warn; return C.acute; }
-function fmt(v,d=2){ if(v==null) return '—'; const a=Math.abs(v); return a>=1000? v.toLocaleString(undefined,{maximumFractionDigits:0}) : v.toFixed(d); }
-function bar(score,w){ const c=scoreColor(score); const pct=score==null?0:Math.max(2,Math.min(100,score));
-  return `<div class="bar" style="${w?`width:${w}px`:''}"><span style="width:${pct}%;background:${c}"></span></div>`; }
-const methodBadge = m => { const k=(m||'').includes('percentile')?'pct':(m||'').includes('derived')?'der':'anc';
-  return `<span class="badge ${k}">${m||'—'}</span>`; };
+const C={calm:'#2ea043',watch:'#d4a017',warn:'#e8731c',acute:'#e5484d',ref:'#4b8bf4',mut:'#8b98a8',dim:'#5c6b7e'};
+let DATA=null;
 
+function seg(s){ if(s==null) return C.dim; if(s<35)return C.calm; if(s<55)return C.watch; if(s<70)return C.warn; return C.acute; }
+function fmt(v,d){ if(v==null||v!=v) return '—'; const a=Math.abs(v); if(a>=1000) return v.toLocaleString(undefined,{maximumFractionDigits:0});
+  return v.toFixed(d==null?(a<100?2:0):d); }
+function pctc(f){ if(f==null) return C.dim; if(f>=1)return C.acute; if(f>=.8)return C.warn; if(f>=.5)return C.watch; return C.calm; }
+function bar(score,w){ const p=score==null?0:Math.max(2,Math.min(100,score));
+  return `<div class="bar"${w?` style="width:${w}px"`:''}><span style="width:${p}%;background:${seg(score)}"></span></div>`; }
+
+/* ---------- threshold ladder (live composite) ---------- */
+function ladder(v,b){
+  const stops=[[0,b.benign,'Calm',C.calm],[b.benign,b.watch,'Watch',C.watch],
+               [b.watch,b.warning,'Elevated',C.warn],[b.warning,b.acute,'Warn',C.warn],[b.acute,100,'Acute',C.acute]];
+  const segs=stops.map(([lo,hi,lab,col])=>`<div class="seg" style="width:${(hi-lo)}%;background:${col}">${hi-lo>=10?lab:''}</div>`).join('');
+  return `<div class="ladder"><div class="track">${segs}<div class="pin" data-v="${v}" style="left:${Math.min(99,v)}%"></div></div>
+    <div class="scale"><span>0</span><span>${b.benign}</span><span>${b.warning}</span><span>100</span></div></div>`;
+}
+
+/* ---------- sparkline ---------- */
+function spark(arr){
+  if(!arr||arr.length<3) return '<span style="color:var(--dim)">—</span>';
+  const w=58,h=16,mn=Math.min(...arr),mx=Math.max(...arr),rng=(mx-mn)||1;
+  const pts=arr.map((v,i)=>`${(i/(arr.length-1)*w).toFixed(1)},${(h-((v-mn)/rng)*h).toFixed(1)}`).join(' ');
+  return `<svg width="${w}" height="${h}" style="vertical-align:middle"><polyline points="${pts}" fill="none" stroke="${seg(arr[arr.length-1])}" stroke-width="1.5"/></svg>`;
+}
+function arrow(t){ if(t==null) return '<span class="arrow flat">·</span>';
+  if(t>2) return `<span class="arrow up">▲${fmt(t,0)}</span>`; if(t<-2) return `<span class="arrow down">▼${fmt(-t,0)}</span>`;
+  return '<span class="arrow flat">→</span>'; }
+
+/* ---------- composite scenario recompute (faithful to build.py) ---------- */
+function recompute(inds,meta){
+  const W=meta.weights, dz=meta.danger_zone, floor=meta.floor;
+  const live=inds.filter(r=>r.score!=null);
+  const buckets={}; for(const b in W){ const v=live.filter(r=>r.bucket===b).map(r=>r.score);
+    buckets[b]=v.length?v.reduce((a,c)=>a+c,0)/v.length:null; }
+  const avail=Object.keys(W).filter(b=>buckets[b]!=null); const wsum=avail.reduce((a,b)=>a+W[b],0)||1;
+  const raw=avail.reduce((a,b)=>a+buckets[b]*W[b]/wsum,0);
+  const breadth=live.length?live.filter(r=>r.score>=dz).length/live.length:0;
+  const comp=raw*(floor+(1-floor)*breadth);
+  return {composite:+comp.toFixed(1),raw:+raw.toFixed(1),breadth:+breadth.toFixed(2),buckets};
+}
+
+/* ============================ RENDER ============================ */
 function render(d){
-  const bands = d.meta.bands;
-  document.getElementById('stamp').innerHTML =
-    `generated ${d.generated.replace('T',' ').replace('+00:00','Z')}<br>`+
-    `${d.n_live}/${d.n_total} indicators live · coverage ${Math.round(d.coverage*100)}%`;
+  DATA=d; const b=d.meta.bands, app=document.getElementById('app'); app.innerHTML='';
+  document.getElementById('stamp').innerHTML=
+    `generated ${d.generated.replace('T',' ').replace('+00:00','Z')}<br>regime: <b style="color:#cdd9e5">${d.regime.label}</b>`;
 
-  const app = document.getElementById('app');
-  const stanceCol = bandColor(d.composite,bands);
-
-  // ---- HERO ----
-  app.insertAdjacentHTML('beforeend', `
-  <div class="panel hero">
-    <div class="gauge">
-      <div class="num" style="color:${stanceCol}">${d.composite}</div>
-      <div class="pm">± ${d.margin}</div>
-      <div class="lbl">Composite · Posture</div>
-      ${bar(d.composite,160)}
+  /* HERO */
+  const col=d.composite<b.benign?C.calm:d.composite<b.warning?C.watch:d.composite<b.acute?C.warn:C.acute;
+  const st=d.stress_types.map(s=>`<div class="stchip"><div class="l">${s.label}</div>
+    <div class="v" style="color:${seg(s.score)}">${s.score}</div><div class="mini"><span style="width:${s.score}%;background:${seg(s.score)}"></span></div>
+    <div class="d">${s.desc}</div></div>`).join('');
+  app.insertAdjacentHTML('beforeend',`<div class="panel hero">
+    <div>
+      <div class="score" style="color:${col}">${d.composite}<small> ± ${d.margin}</small></div>
+      <div class="scorelbl">Composite · posture (0–100 stress)</div>
+      <div class="tag" style="background:${col}22;color:${col};border:1px solid ${col}66">${d.verdict.label}</div>
+      ${ladder(d.composite,b)}
+      <div class="metrow"><span>raw <b>${d.composite_raw}</b></span><span>breadth <b>${d.breadth}</b></span>
+        <span class="link" onclick="openMethod()">how it's built ›</span></div>
     </div>
-    <div class="stance">
-      <div class="tag" style="background:${stanceCol}22;color:${stanceCol};border:1px solid ${stanceCol}55">${d.verdict.label}</div>
-      <div>${d.verdict.stance}</div>
-      <div class="meta-row">
-        <span>raw <b>${d.composite_raw}</b></span>
-        <span>breadth <b>${d.breadth}</b></span>
-        <span>trip-wires <b style="color:${d.verdict.tripped?C.acute:C.calm}">${d.verdict.tripped}/${d.tripwires.length}</b></span>
-        <span>bands: watch ${bands.watch} · warn ${bands.warning} · acute ${bands.acute}</span>
-      </div>
-      <div class="note">POSTURE = how defensive to sit (composite). ACTION = when to move (trip-wires below). They are deliberately separate.</div>
-    </div>
-  </div>`);
+    <div>
+      <div class="interp">${d.interpretation}</div>
+      <div class="regime">Regime: <b>${d.regime.label}</b> — ${d.regime.why} · market-core 3m momentum ${d.regime.slope_3m>0?'+':''}${d.regime.slope_3m}</div>
+      <div class="stchips">${st}</div>
+    </div></div>`);
 
-  // ---- BUCKETS + (POSTURE) and TRIPWIRES (ACTION) ----
-  const buckets = d.buckets.map(b=>`
-    <div class="bucket">
-      <div class="top"><span class="n">${b.label}</span>
-        <span class="s" style="color:${scoreColor(b.score)}">${b.score==null?'—':b.score}</span></div>
-      ${bar(b.score)}
-      <div class="w">weight ${b.weight}${b.weight_used&&b.weight_used!=b.weight?` · used ${b.weight_used}`:''}</div>
-    </div>`).join('');
+  /* FRESHNESS */
+  const f=d.freshness;
+  const confchips=f.confidence.map(c=>`<span class="chip"><span class="dot" style="background:${c.pct>=90?C.calm:c.pct>=75?C.watch:C.warn}"></span>${c.source} <b>${c.pct}%</b> ×${c.n}</span>`).join('');
+  app.insertAdjacentHTML('beforeend',`<div class="panel"><div class="fresh">
+    <span class="chip">coverage <b>${Math.round(f.coverage*100)}%</b></span>
+    <span class="chip">live <b>${f.n_live}/${f.n_total}</b></span>
+    <span class="chip">stale <b style="color:${f.stale_count?C.watch:C.calm}">${f.stale_count}</b></span>
+    <span class="chip">confidence haircut <b>± ${f.margin}</b></span>
+    <span class="chip">market data <b>${f.market_asof}</b></span>
+    <span class="chip">manual layer <b>${f.manual_newest||'—'}</b></span>
+    ${confchips}</div>
+    <div class="note">Manual macro series (RBI/AMFI/NSE/MoSPI) update monthly; market series are live. Stale &gt;45d widens the ±margin.</div></div>`);
 
-  const tw = d.tripwires.map(t=>{
-    const cls = t.tripped===true?'hit':t.tripped===false?'ok':'na';
-    const box = t.tripped===true?'[✕]':t.tripped===false?'[ ]':'[?]';
-    const op = t.trips_when==='above'?'>':'<';
-    return `<div class="tw ${cls}"><div class="box">${box}</div>
-      <div class="body"><b>${t.name}</b> ${op} ${fmt(t.level,t.level%1?2:0)}${t.unit}
-        <div class="meaning">${t.note}</div></div>
-      <div class="val">now ${fmt(t.value, (t.value!=null&&Math.abs(t.value)<100)?2:0)}${t.unit}</div></div>`;
+  /* HEADLINE PAIR: distance-to-trip (action) + defeaters (cushion) */
+  const dtt=[...d.distance_to_trip].sort((a,b)=>(b.fill??-1)-(a.fill??-1)).map(g=>{
+    const f2=g.fill==null?0:Math.min(1,g.fill); const col=pctc(g.fill);
+    const op=g.trips_when==='above'?'≥':'≤';
+    return `<div class="dtt${g.tripped?' tripped':''}"><div class="row1">
+      <span class="nm">${g.name}<span class="pct">${g.fill==null?'—':Math.round(g.fill*100)+'% to trip'}</span></span>
+      <span class="vals">${fmt(g.current)}${g.unit} → ${op}${fmt(g.level)}${g.unit}</span></div>
+      <div class="gtrack"><span style="width:${Math.max(2,f2*100)}%;background:${col}"></span></div>
+      <div class="note">${g.note}</div></div>`;
   }).join('');
-  const trippedMsg = d.verdict.tripped===0
-    ? 'No acute triggers firing — the action layer is quiet.'
-    : `${d.verdict.tripped} firing — watch closely.`;
+  const defs=d.defeaters.length?d.defeaters.map(x=>`<div class="def"><span>${x.name} <span class="b">· ${x.bucket_label}</span></span>
+      <span style="color:${seg(x.score)};font-family:var(--mono)">${x.score}</span></div>`).join(''):'<div class="note">None — even calm indicators are stressed.</div>';
+  app.insertAdjacentHTML('beforeend',`<div class="two">
+    <div class="panel"><h2>What could break next <span class="sub">distance-to-trip · action layer</span></h2>${dtt}</div>
+    <div class="panel"><h2>Why risk is capped <span class="sub">bull-case defeaters</span></h2>${defs}
+      <div class="note">The lowest-stress readings right now — the permanent anti-confirmation-bias check.</div></div></div>`);
 
-  app.insertAdjacentHTML('beforeend', `
-  <div class="twocol">
-    <div class="panel"><h2>Buckets · Posture</h2>${buckets}</div>
-    <div class="panel"><h2>Trip-Wires · Action</h2>${tw}
-      <div class="note">${trippedMsg}</div></div>
-  </div>`);
+  /* TRAJECTORY */
+  app.insertAdjacentHTML('beforeend',`<div class="panel"><h2>Composite trajectory
+    <span class="sub">market-core (external + sentiment) · backtestable history</span></h2>
+    ${trajSVG(d.trajectory)}
+    <div class="note">The market-driven core only (the 3 manual buckets have no back-history). It spiked to acute in the
+      2013 taper tantrum and the 2008/2020 crises, and correctly stayed low before COVID. The live hero number above is
+      the broader 5-bucket composite on the same 0–100 scale.</div></div>`);
 
-  // ---- DEFEATERS ----
-  const defs = d.defeaters.length? d.defeaters.map(x=>`
-    <div class="def"><span>${x.name} <span class="b">· ${x.bucket_label}</span></span>
-      <span style="color:${scoreColor(x.score)};font-family:var(--mono)">${x.score}</span></div>`).join('')
-    : `<div class="note">None — even historically-calm indicators are now stressed.</div>`;
-  app.insertAdjacentHTML('beforeend', `
-  <div class="panel"><h2>Bull-Case Defeaters · what's working against the thesis</h2>${defs}
-    <div class="note">Permanent anti-confirmation-bias check: the lowest-stress readings right now.</div></div>`);
+  /* WATERFALL · FWD RETURNS · PROBABILITIES */
+  const wf=d.contributions.map(c=>{const pct=c.contribution/d.composite_raw*100;
+    return `<div class="row"><span class="lab">${c.label}</span>
+      <span class="barwrap"><span style="width:${pct}%;background:${seg(DATA.buckets.find(x=>x.key===c.key).score)}"></span></span>
+      <span class="v">${c.contribution.toFixed(1)}</span></div>`;}).join('');
+  const liveBand=fwdBand(d);
+  const ft=d.forward_returns.map(r=>`<tr${r.band===liveBand?' class="cur"':''}><td class="${r.band===liveBand?'cur':''}">${r.band}</td>
+    <td class="num">${r.n}</td><td class="num" style="color:${r.avg_fwd_12m>=0?C.calm:C.acute}">${r.avg_fwd_12m>0?'+':''}${r.avg_fwd_12m}%</td>
+    <td class="num">${r.worst}%</td><td class="num">${r.p_down20}%</td></tr>`).join('');
+  const prob=d.probabilities.map(p=>`<div class="p"><div><div>${p.label}</div><div class="pn">${p.note}</div></div>
+    <div class="pv" style="color:${p.pct==null?C.mut:p.pct>=60?C.calm:p.pct>=30?C.watch:C.acute}">${p.pct==null?'':p.pct+'%'}</div></div>`).join('');
+  app.insertAdjacentHTML('beforeend',`<div class="three">
+    <div class="panel"><h2>Contribution <span class="sub">→ raw ${d.composite_raw}</span></h2><div class="wf">${wf}</div>
+      <div class="note">Each bucket's weighted share of the raw composite (before the breadth discount).</div></div>
+    <div class="panel"><h2>Forward 12m Nifty <span class="sub">by composite band</span></h2>
+      <table class="ft"><thead><tr><th>band</th><th>n</th><th>avg</th><th>worst</th><th>↓20%</th></tr></thead><tbody>${ft}</tbody></table>
+      <div class="caveat">${d.fwd_note}</div></div>
+    <div class="panel"><h2>Indicative odds <span class="sub">12m · heuristic</span></h2><div class="prob">${prob}</div>
+      <div class="note">Anchored to the historical outcome frequency for the current band — indicative, not a forecast.</div></div></div>`);
 
-  // ---- INDICATOR TABLE ----
-  let rows='';
-  d.buckets.forEach(b=>{
-    rows += `<tr class="grp"><td colspan="5">${b.label} &nbsp; <span style="color:var(--mut);font-weight:400">weight ${b.weight}</span></td></tr>`;
-    b.indicators.forEach(r=>{
-      const stale = r.stale? ` <span class="stale" title="${r.age_days} days old">stale</span>`:'';
-      rows += `<tr>
-        <td>${r.name}${stale}</td>
-        <td class="num">${fmt(r.current, (r.current!=null&&Math.abs(r.current)<1000)?2:0)}</td>
-        <td>${methodBadge(r.method)}</td>
-        <td><span class="badge">${r.source}</span></td>
-        <td><div class="scorecell">${bar(r.score)}<span style="color:${scoreColor(r.score)};min-width:34px;text-align:right">${r.score==null?'—':r.score}</span></div></td>
-      </tr>`;
-    });
-  });
-  app.insertAdjacentHTML('beforeend', `
-  <div class="panel"><h2>All Indicators · ${d.n_live}/${d.n_total} live</h2>
-    <table><thead><tr><th>Indicator</th><th class="num">Value</th><th>Method</th><th>Source</th><th style="text-align:right">Stress 0–100</th></tr></thead>
-    <tbody>${rows}</tbody></table>
-    <div class="note">Method: <b>percentile</b> = ranked vs own history · <b>anchor</b> = calm→0 / stress→100 (pre-history) · <b>derived</b> = computed. Manual indicators auto-switch anchor→percentile at ${d.meta.anchor_switch_n} readings.</div>
-  </div>`);
+  /* REGIME + ANALOGS + BUCKETS */
+  const ana=d.analogs.length?d.analogs.map(a=>`<div class="a"><span class="yr">${a.period}</span>
+    <span class="barwrap"><span style="width:${a.similarity}%"></span></span><span class="s">${a.similarity}%</span></div>`).join(''):'<div class="note">insufficient history</div>';
+  const bks=d.buckets.map(bk=>`<div class="bk"><div class="t"><span class="n">${bk.label}</span>
+    <span class="s" style="color:${seg(bk.score)}">${bk.score==null?'—':bk.score}</span></div>${bar(bk.score)}
+    <div class="w">weight ${bk.weight}${bk.weight_used&&bk.weight_used!=bk.weight?` · used ${bk.weight_used}`:''}</div></div>`).join('');
+  app.insertAdjacentHTML('beforeend',`<div class="three">
+    <div class="panel"><h2>Historical analog <span class="sub">market-vector similarity</span></h2><div class="ana">${ana}</div>
+      <div class="note">Closest prior months by Euclidean similarity on the 4-D market stress vector.</div></div>
+    <div class="panel" style="grid-column:span 2"><h2>Buckets <span class="sub">posture decomposition</span></h2>${bks}</div></div>`);
 
-  // ---- CONTEXT ----
-  const ctx = d.context.map(c=>`<div class="c">${c.name}: <b>${fmt(c.value,0)}</b> <span>(${c.chg_12m>=0?'+':''}${fmt(c.chg_12m,1)}% 12m)</span></div>`).join('');
-  app.insertAdjacentHTML('beforeend', `<div class="panel"><h2>Market Context</h2><div class="context">${ctx}</div></div>`);
+  /* SCENARIO ENGINE */
+  app.insertAdjacentHTML('beforeend',`<div class="panel"><h2>Scenario engine <span class="sub">re-score the composite</span></h2>
+    <div class="tools" id="scenbtns">
+      <button class="btn" onclick="scenario('live')">● Live</button>
+      <button class="btn" onclick="scenario('rupee')">Rupee crisis</button>
+      <button class="btn" onclick="scenario('oil')">Oil shock</button>
+      <button class="btn" onclick="scenario('froth')">Midcap mania peak</button>
+      <button class="btn" onclick="scenario('fii')">FII exodus</button>
+    </div>
+    <div id="scenout" class="metrow"></div>
+    <div class="note">Toggles override the affected indicators' stress to a stressed level and recompute the composite client-side (same math as the build). A what-if, not a forecast.</div></div>`);
+  scenario('live');
 
-  // ---- FOOTER ----
-  const auditMsg = d.audit_problems.length
-    ? `<b style="color:${C.acute}">⚠ AUDIT: ${d.audit_problems.join(', ')}</b>`
-    : `<b style="color:${C.calm}">✓ Directionality audit clean</b> — every sign verified this build.`;
-  document.getElementById('footer').innerHTML = `
-    ${auditMsg}<br>
-    Weights are deliberately asymmetric (external/currency 0.25): India's real crashes — 2013 taper tantrum,
-    2018 NBFC — were capital-flow / currency driven, not domestic-yield driven. Backtest: 2013 external bucket
-    peaked ~93, composite hit acute; 2018 hit watch; COVID correctly NOT predicted.<br>
-    <i>The model's job is to be right, not reassuring. Composite = posture; trip-wires = action — never collapse to one number.</i>`;
+  /* INDICATOR TABLE */
+  app.insertAdjacentHTML('beforeend',`<div class="panel"><h2>All indicators <span class="sub">${d.n_live}/${d.n_total} live · sort & filter</span></h2>
+    <div class="tools">
+      <select id="filt" onchange="renderTable()">
+        <option value="">all families</option>
+        <option value="valuation">valuation</option><option value="external_currency">external / currency</option>
+        <option value="macro_stress">macro stress</option><option value="domestic_flows">domestic flows</option>
+        <option value="sentiment_froth">sentiment / froth</option></select>
+      <select id="srt" onchange="renderTable()">
+        <option value="bucket">group by bucket</option><option value="stress">most stressed</option>
+        <option value="trend">rising fastest</option><option value="stale">most stale</option></select>
+    </div>
+    <div class="tblwrap"><table><thead><tr><th>Indicator</th><th class="num">Value</th><th>Trend</th>
+      <th>Method</th><th>Source</th><th style="text-align:right">Stress 0–100</th></tr></thead>
+      <tbody id="tbody"></tbody></table></div>
+    <div class="note">Method: <b>percentile</b> = ranked vs own history · <b>anchor</b> = calm→0/stress→100 (pre-history) ·
+      <b>derived</b> = computed. Manual indicators auto-switch anchor→percentile at ${d.meta.anchor_switch_n} readings.</div></div>`);
+  renderTable();
+
+  /* CONTEXT */
+  const ctx=d.context.map(c=>`<span class="chip">${c.name} <b>${fmt(c.value,0)}</b> ${c.chg_12m==null?'':`(${c.chg_12m>=0?'+':''}${fmt(c.chg_12m,1)}% 12m)`}</span>`).join('');
+  app.insertAdjacentHTML('beforeend',`<div class="panel"><h2>Market context</h2><div class="fresh">${ctx}</div></div>`);
+
+  /* FOOTER */
+  const au=d.audit_problems.length?`<b style="color:${C.acute}">⚠ AUDIT: ${d.audit_problems.join(', ')}</b>`
+    :`<b style="color:${C.calm}">✓ Directionality audit clean</b> — every sign verified this build.`;
+  document.getElementById('footer').innerHTML=`${au} · A live, quantified country-macro memo with scoring rails —
+    not a trading cockpit. Composite = posture; trip-wires = action; the three lenses keep recession ≠ credit ≠ bubble distinct.
+    <i>The model's job is to be right, not reassuring.</i>`;
 }
 
-function embedded(){
-  try{
-    const raw = (document.getElementById('bootstrap-data').textContent || '').trim();
-    const d = JSON.parse(raw);
-    return (d && d.composite != null) ? d : null;   // {} placeholder => not built yet
-  }catch(e){ return null; }
+/* ---------- trajectory SVG ---------- */
+function trajSVG(t){
+  const W=1040,H=240,padL=30,padR=12,padT=14,padB=22, n=t.points.length;
+  const x=i=>padL+i*(W-padL-padR)/(n-1), y=v=>padT+(100-v)/100*(H-padT-padB);
+  const idx={}; t.points.forEach((p,i)=>idx[p.d]=i);
+  const near=ym=>{ if(idx[ym]!=null)return idx[ym]; let bi=0; t.points.forEach((p,i)=>{if(p.d<=ym)bi=i;}); return bi; };
+  const bands=t.bands.map(bd=>{const x0=x(near(bd.start)),x1=x(near(bd.end));
+    return `<rect x="${x0}" y="${padT}" width="${Math.max(2,x1-x0)}" height="${H-padT-padB}" fill="#e5484d12"/>
+      <text x="${(x0+x1)/2}" y="${padT+10}" fill="#e5484d99" font-size="9" text-anchor="middle" font-family="var(--mono)">${bd.label}</text>`;}).join('');
+  const th=t.thresholds; const lines=[['watch',th.watch,C.watch],['warning',th.warning,C.warn],['acute',th.acute,C.acute]]
+    .map(([l,v,c])=>`<line x1="${padL}" y1="${y(v)}" x2="${W-padR}" y2="${y(v)}" stroke="${c}" stroke-width="1" stroke-dasharray="4 4" opacity=".5"/>
+      <text x="${W-padR}" y="${y(v)-3}" fill="${c}" font-size="9" text-anchor="end" font-family="var(--mono)">${l} ${v}</text>`).join('');
+  const path=t.points.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(p.v).toFixed(1)}`).join(' ');
+  const ticks=t.points.filter((p,i)=>p.d.endsWith('-01')&&p.d.slice(0,4)%3===0).map(p=>{const i=idx[p.d];
+    return `<text x="${x(i)}" y="${H-6}" fill="#5c6b7e" font-size="9" text-anchor="middle" font-family="var(--mono)">${p.d.slice(0,4)}</text>`;}).join('');
+  const last=t.points[n-1];
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" preserveAspectRatio="xMidYMid meet" style="display:block">
+    ${bands}${lines}
+    <path d="${path}" fill="none" stroke="#cdd9e5" stroke-width="1.6"/>
+    <circle cx="${x(n-1)}" cy="${y(last.v)}" r="3.5" fill="#cdd9e5"/>
+    <text x="${x(n-1)-4}" y="${y(last.v)-6}" fill="#cdd9e5" font-size="10" text-anchor="end" font-family="var(--mono)">${last.v}</text>
+    ${ticks}</svg>`;
 }
-function fail(msg){
-  document.getElementById('app').innerHTML =
-    `<div class="err"><b>Could not load data</b> — ${msg}<br>
-     Run <code>python build.py</code> to generate the dashboard, then either open this file
-     directly or serve it with <code>python -m http.server</code> in <code>output/</code>.</div>`;
+function fwdBand(d){ const v=d.trajectory.points[d.trajectory.points.length-1].v;
+  for(const r of d.forward_returns){const lo=+r.band.split('-')[0],hi=r.band.endsWith('+')?999:+r.band.split('-')[1];
+    if(v>=lo&&v<hi)return r.band;} return null; }
+
+/* ---------- scenario ---------- */
+const SCEN={
+  rupee:{usdinr_12m:95,brent_inr:90,fx_reserves_8w:92,fii_3m:90,gsec_10y:70,india_vix:75},
+  oil:{brent_inr:96,trade_deficit:88,cpi_gap:82,usdinr_12m:78,gsec_10y:60},
+  froth:{smallcap_ratio:99,sme_ipo_gains:96,fno_cash_ratio:92,mtf_book:95,demat_growth:90,nifty_pe:85},
+  fii:{fii_3m:96,usdinr_12m:90,fx_reserves_8w:85,india_vix:70}
+};
+function scenario(key){
+  const meta=DATA.meta; const base=DATA.indicators.map(r=>({bucket:r.bucket,score:r.score}));
+  let inds=base, name='Live';
+  if(key!=='live'){ const ov=SCEN[key]; name={rupee:'Rupee crisis',oil:'Oil shock',froth:'Midcap mania peak',fii:'FII exodus'}[key];
+    inds=DATA.indicators.map(r=>({bucket:r.bucket,score:(ov[r.key]!=null?ov[r.key]:r.score)})); }
+  const r=recompute(inds,meta); const b=meta.bands;
+  const col=r.composite<b.benign?C.calm:r.composite<b.warning?C.watch:r.composite<b.acute?C.warn:C.acute;
+  const lab=r.composite<b.benign?'no crisis signal':r.composite<b.warning?'watch':r.composite<b.acute?'warning':'acute';
+  const delta=key==='live'?'':` (${r.composite>=DATA.composite?'+':''}${(r.composite-DATA.composite).toFixed(1)} vs live)`;
+  document.getElementById('scenout').innerHTML=
+    `<span><b>${name}</b> →</span> <span>composite <b style="color:${col};font-size:18px">${r.composite}</b>${delta}</span>
+     <span>raw <b>${r.raw}</b></span><span>breadth <b>${r.breadth}</b></span>
+     <span class="tag" style="background:${col}22;color:${col}">${lab}</span>`;
+  [...document.querySelectorAll('#scenbtns .btn')].forEach(btn=>btn.style.borderColor=
+    btn.getAttribute('onclick').includes(`'${key}'`)?col:'var(--line2)');
 }
-// Server (GitHub Pages): live fetch wins. file:// : fetch is blocked -> embedded snapshot.
-fetch('data.json?_=' + Date.now())
-  .then(r=>{ if(!r.ok) throw new Error(r.status); return r.json(); })
-  .then(render)
-  .catch(()=>{ const d = embedded();
-    d ? render(d) : fail('fetch blocked (file://) and no embedded snapshot — run build.py first.'); });
+
+/* ---------- indicator table ---------- */
+function renderTable(){
+  const d=DATA, filt=document.getElementById('filt').value, srt=document.getElementById('srt').value;
+  let rows=d.indicators.filter(r=>!filt||r.bucket===filt);
+  let html='';
+  const tr=r=>{const stale=r.stale?` <span class="tip" data-tip="${r.age_days} days old — widens the confidence margin" style="color:var(--watch)">stale</span>`:'';
+    const mk=(r.method||'').includes('percentile')?'pct':(r.method||'').includes('derived')?'der':'anc';
+    return `<tr><td><span class="tip" data-tip="${DEFS[r.key]||r.bucket_label+' · stress when '+(r.direction==='high'?'high':'low')}">${r.name}</span>${stale}</td>
+      <td class="num">${fmt(r.current)}</td><td>${spark(r.spark)} ${arrow(r.trend)}</td>
+      <td><span class="badge ${mk}">${r.method||'—'}</span></td><td><span class="badge">${r.source}</span></td>
+      <td><div class="scorecell">${bar(r.score)}<span style="color:${seg(r.score)};min-width:30px;text-align:right">${r.score==null?'—':r.score}</span></div></td></tr>`;};
+  if(srt==='bucket'){ for(const bk of d.buckets){ const g=rows.filter(r=>r.bucket===bk.key); if(!g.length)continue;
+      html+=`<tr><td colspan="6" style="background:var(--panel2);font-weight:600;font-size:11.5px">${bk.label} · weight ${bk.weight}</td></tr>`;
+      html+=g.map(tr).join(''); } }
+  else { const cmp={stress:(a,b)=>(b.score??-1)-(a.score??-1),trend:(a,b)=>(b.trend??-99)-(a.trend??-99),
+      stale:(a,b)=>(b.age_days??-1)-(a.age_days??-1)}[srt]; rows=[...rows].sort(cmp); html=rows.map(tr).join(''); }
+  document.getElementById('tbody').innerHTML=html;
+}
+
+/* ---------- methodology drawer ---------- */
+function drawer(open){ document.getElementById('drawer').classList.toggle('open',open);
+  document.getElementById('scrim').classList.toggle('open',open); }
+function openMethod(){ const d=DATA,b=d.meta.bands;
+  document.getElementById('drawerbody').innerHTML=`<h3>How the composite is built</h3>
+    <p>A 0–100 <b>stress</b> score per indicator, aggregated into five weighted buckets, then discounted by breadth.</p>
+    <h4>1 · Score each indicator</h4><p><b>Percentile</b> — % of an indicator's own history below today's reading
+      (flipped when low = stressful). <b>Anchor</b> — a calm→0 / stress→100 linear map, used until a manual series has
+      ${d.meta.anchor_switch_n} readings, and for India VIX. <b>Derived</b> — computed (e.g. earnings-yield − G-sec).</p>
+    <h4>2 · Weight the buckets</h4><p>${Object.entries(d.meta.weights).map(([k,v])=>k.replace('_',' / ')+' '+v).join(' · ')}.
+      The heavy external/currency weight is deliberate: India's real crashes (2013 taper, 2018 NBFC) were
+      capital-flow / currency driven.</p>
+    <h4>3 · Breadth discount</h4><p>composite = raw × (floor ${d.meta.floor} + (1−floor) × breadth), where breadth =
+      share of indicators in the danger zone (≥${d.meta.danger_zone}). A score driven by a few screaming indicators is
+      discounted toward the floor — broad agreement is required for full conviction.</p>
+    <h4>4 · Bands (calibrated by backtest)</h4><p>Calm &lt;${b.benign} · Watch ${b.benign}–${b.warning} ·
+      Warning ${b.warning}–${b.acute} · Acute ≥${b.acute}. Set on the market-core composite, point-in-time 2005–2021:
+      2013 taper ~76, 2018 NBFC ~64, COVID pre-peak ~24.</p>
+    <h4>Honesty rails</h4><p>Posture ≠ action (composite vs trip-wires). Directionality audited every build.
+      The 3 manual buckets have no back-history, so the trajectory/forward-returns describe the market-core only,
+      and the ±margin widens with stale data. The model's job is to be right, not reassuring.</p>`;
+  drawer(true);
+}
+
+const DEFS={
+  usdinr_12m:"USD/INR 12-month % move. Rupee weakening = stress.",
+  brent_inr:"Brent crude priced in rupees (USD price × USD/INR) — the figure that actually hits India's import bill.",
+  fii_3m:"Foreign institutional investor net equity, rolling 3 months. Outflows = the key EM-stress signal.",
+  fx_reserves_8w:"8-week % change in RBI FX reserves. Falling = RBI defending the rupee = stress.",
+  smallcap_ratio:"Nifty Midcap / Nifty 50. Mid/small-cap outperformance peaks mark late-cycle froth.",
+  ey_gsec_gap:"Earnings yield (1/PE) minus the 10Y G-sec yield. Negative = equities expensive vs bonds.",
+  buffett_in:"Total market cap ÷ nominal GDP. India sits ~100–120% historically.",
+  india_vix:"India VIX. Low = complacency, high = fear — scored by anchor, not pure percentile.",
+  sme_ipo_gains:"Average SME-IPO listing-day gain. India's signature top signal; +200% = mania.",
+  mtf_book:"Margin-trading-facility book — broker leverage extended to retail. Record highs = leverage risk."
+};
+
+/* ---------- boot: server fetch wins, file:// uses embedded snapshot ---------- */
+function embedded(){ try{ const d=JSON.parse((document.getElementById('bootstrap-data').textContent||'').trim());
+  return (d&&d.composite!=null)?d:null; }catch(e){ return null; } }
+function fail(m){ document.getElementById('app').innerHTML=`<div class="err"><b>Could not load data</b> — ${m}<br>
+  Run <code>python build.py</code>, then open this file directly or serve <code>output/</code> with <code>python -m http.server</code>.</div>`; }
+fetch('data.json?_='+Date.now()).then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).then(render)
+  .catch(()=>{const d=embedded(); d?render(d):fail('fetch blocked (file://) and no embedded snapshot — run build.py first.');});
 </script>
 </body>
 </html>
