@@ -258,6 +258,8 @@ function render(d){
 
   /* FRESHNESS */
   const f=d.freshness;
+  const manualAge=f.manual_newest?Math.max(0,Math.round((new Date(d.generated)-new Date(f.manual_newest+'T00:00:00Z'))/86400000)):null;
+  const manualColor=manualAge==null?C.dim:manualAge>45?C.acute:manualAge>30?C.watch:C.calm;
   const confchips=f.confidence.map(c=>`<span class="chip"><span class="dot" style="background:${c.pct>=90?C.calm:c.pct>=75?C.watch:C.warn}"></span>${c.source} <b>${c.pct}%</b> ×${c.n}</span>`).join('');
   app.insertAdjacentHTML('beforeend',`<div class="panel"><div class="fresh">
     <span class="chip">coverage <b>${Math.round(f.coverage*100)}%</b></span>
@@ -266,8 +268,9 @@ function render(d){
     <span class="chip">confidence haircut <b>± ${f.margin}</b></span>
     <span class="chip">market data <b>${f.market_asof}</b></span>
     <span class="chip">manual layer <b>${f.manual_newest||'—'}</b></span>
+    <span class="chip">manual age <b style="color:${manualColor}">${manualAge==null?'—':manualAge+'d'}</b></span>
     ${confchips}</div>
-    <div class="note">Manual macro series (RBI/AMFI/NSE/MoSPI) update monthly; market series are live. Stale &gt;45d widens the ±margin.</div></div>`);
+    <div class="note">Manual macro series (RBI/AMFI/NSE/MoSPI) update monthly; market series are live. 31–45d is due for refresh; stale &gt;45d widens the ±margin.</div></div>`);
 
   /* HEADLINE PAIR: distance-to-trip (action) + defeaters (cushion) */
   const dtt=[...d.distance_to_trip].sort((a,b)=>(b.fill??-1)-(a.fill??-1)).map(g=>{
