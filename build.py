@@ -11,6 +11,7 @@ import sys
 import re
 import json
 import datetime
+from pathlib import Path
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:                       # Windows console is cp1252; our strings use — and ≠ (UTF-8 in data)
@@ -25,6 +26,8 @@ from data import fetch_market
 OUT = os.path.join(ROOT, "output", "data.json")
 HTML = os.path.join(ROOT, "output", "index.html")
 LOG = os.path.join(ROOT, "log.md")
+HISTORY = os.path.join(ROOT, "history")
+MODEL_VERSION = "india-risk-v2"
 
 BUCKET_LABELS = {
     "valuation": "Valuation",
@@ -85,11 +88,15 @@ def build():
     print(f"  READ                : {an['interpretation']}")
 
     # ---- assemble data.json ----
-    payload = _payload(rows, c, a, values, an)
+    generated_at = datetime.datetime.now(datetime.timezone.utc)
+    payload = _payload(rows, c, a, values, an, generated_at)
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
         json.dump(payload, f, indent=2)
     print(f"\n  wrote {OUT}")
+    archived = _archive_snapshot(payload)
+    removed = _compact_history()
+    print(f"  archived {archived}" + (f"; compacted {removed} old snapshots" if removed else ""))
     _inject_snapshot(payload)
 
     _log(rows, c, a)
@@ -117,7 +124,57 @@ def _inject_snapshot(payload):
         print("  [warn] bootstrap-data block not found; snapshot not embedded")
 
 
-def _payload(rows, c, a, values, an):
+def _artifact_metadata(rows, c, generated_at):
+    dates = lambda source: [r["date"] for r in rows
+                            if r["source"] == source and r.get("date")]
+    counts = {}
+    for r in rows:
+        item = counts.setdefault(r["source"], {"total": 0, "live": 0, "stale": 0})
+        item["total"] += 1
+        item["live"] += int(bool(r.get("ok")))
+        item["stale"] += int(bool(r.get("stale")))
+    return {
+        "generated_at": generated_at.isoformat(timespec="microseconds"),
+        "market_as_of": max((str(d) for d in dates("market")), default=None),
+        "manual_as_of": max((str(d) for d in dates("manual")), default=None),
+        "source_counts": counts,
+        "margin": c["margin"],
+        "model_version": MODEL_VERSION,
+        "source_sha": (os.environ.get("GITHUB_SHA") or "local")[:12],
+    }
+
+
+def _archive_snapshot(payload, directory=HISTORY):
+    """Write one immutable JSON snapshot per build and return its path."""
+    stamp = datetime.datetime.fromisoformat(payload["generated"]).astimezone(
+        datetime.timezone.utc).strftime("%Y-%m-%dT%H%M%S.%fZ")
+    path = Path(directory) / f"{stamp}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("x", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2)
+    return str(path)
+
+
+def _compact_history(directory=HISTORY, keep_daily_days=730, today=None):
+    """Keep every build for two years, then only the latest snapshot per month."""
+    cutoff = (today or datetime.date.today()) - datetime.timedelta(days=keep_daily_days)
+    old = {}
+    for path in Path(directory).glob("*.json"):
+        try:
+            date = datetime.datetime.strptime(path.stem, "%Y-%m-%dT%H%M%S.%fZ").date()
+        except ValueError:
+            continue
+        if date < cutoff:
+            old.setdefault((date.year, date.month), []).append(path)
+    removed = 0
+    for paths in old.values():
+        for path in sorted(paths)[:-1]:
+            path.unlink()
+            removed += 1
+    return removed
+
+
+def _payload(rows, c, a, values, an, generated_at):
     sparks = an.pop("sparklines", {})
     by_bucket = {b: [] for b in BUCKETS}
     ind_out = []
@@ -169,21 +226,18 @@ def _payload(rows, c, a, values, an):
     } for b in BUCKETS if c["bucket"][b] is not None]
 
     # freshness / confidence decomposition
-    manual_dates = [r["date"] for r in rows if r["source"] == "manual" and r.get("date")]
+    artifact = _artifact_metadata(rows, c, generated_at)
     stale_count = sum(1 for r in rows if r.get("stale"))
-    by_src = {}
-    for r in rows:
-        by_src.setdefault(r["source"], 0)
-        by_src[r["source"]] += 1
     conf_map = {"market": 95, "derived": 80, "manual": 70}
-    confidence = [{"source": s, "n": n, "pct": conf_map.get(s, 60)}
-                  for s, n in sorted(by_src.items())]
+    confidence = [{"source": s, "n": n["total"], "pct": conf_map.get(s, 60)}
+                  for s, n in sorted(artifact["source_counts"].items())]
     freshness = {
         "coverage": c["coverage"], "n_live": c["n_live"], "n_total": c["n_total"],
         "stale_count": stale_count, "margin": c["margin"],
-        "market_asof": datetime.date.today().isoformat(),
-        "manual_oldest": min((str(d) for d in manual_dates), default=None),
-        "manual_newest": max((str(d) for d in manual_dates), default=None),
+        "market_asof": artifact["market_as_of"],
+        "manual_oldest": min((str(r["date"]) for r in rows
+                              if r["source"] == "manual" and r.get("date")), default=None),
+        "manual_newest": artifact["manual_as_of"],
         "confidence": confidence,
     }
 
@@ -192,7 +246,8 @@ def _payload(rows, c, a, values, an):
                                    # analogs, regime, stress_types, interpretation, probabilities
         "contributions": contributions,
         "freshness": freshness,
-        "generated": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "generated": artifact["generated_at"],
+        "artifact": artifact,
         "composite": c["composite"], "composite_raw": c["composite_raw"],
         "margin": c["margin"], "breadth": c["breadth"], "coverage": c["coverage"],
         "n_live": c["n_live"], "n_total": c["n_total"],

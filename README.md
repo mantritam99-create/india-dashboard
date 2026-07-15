@@ -19,6 +19,7 @@ A static page can't call data sources directly (key leakage + CORS), so the work
 build.py   ── fetch (market + manual) → normalize → AUDIT → score → writes output/data.json
 output/index.html ── static; reads ONLY data.json (no network, no keys)
 GitHub Actions ── runs build.py on a daily cron + manual trigger, deploys output/ to Pages
+               └─ commits output + immutable history snapshots with [skip ci]
 ```
 
 ```
@@ -38,6 +39,7 @@ india-dashboard/
 ├── output/
 │   ├── index.html         # the dashboard (static reader)
 │   └── data.json          # generated artifact
+├── history/               # immutable per-build JSON snapshots committed by Actions
 └── .github/workflows/deploy.yml
 ```
 
@@ -197,6 +199,14 @@ cd output && python -m http.server 8000   # → http://localhost:8000/
 2. **Settings → Pages → Source: GitHub Actions.**
 3. **Actions** tab → run **build-and-deploy** manually for the first build.
 4. The site appears at `https://<you>.github.io/<repo>/`. It then rebuilds daily.
+
+### Auditable build history
+
+Every successful build keeps `output/data.json` as the latest artifact and writes an immutable
+timestamped copy under `history/`. Each payload records generation time, actual market/manual
+as-of dates, source counts, confidence margin, model version, and deploying `GITHUB_SHA`.
+Actions commits these public artifacts with `[skip ci]`, preventing a deployment loop. Retention
+keeps every build for two years, then keeps the latest snapshot from each older calendar month.
 
 ---
 

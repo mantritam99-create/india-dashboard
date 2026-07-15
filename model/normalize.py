@@ -139,14 +139,15 @@ def _score_market(spec):
     s = market_series(spec)
     if s is None or not len(s.dropna()):
         return {"current": None, "score": None, "n": 0, "method": spec.get("method", "percentile"),
-                "stale": False, "series": s}
+                "stale": False, "date": None, "series": s}
     s = s.dropna()
     cur = float(s.iloc[-1])
+    date = s.index[-1].date()
     if spec.get("method") == "anchor":
         return {"current": cur, "score": anchor_score(cur, spec["calm"], spec["stress"]),
-                "n": len(s), "method": "anchor", "stale": False, "series": s}
+                "n": len(s), "method": "anchor", "stale": False, "date": date, "series": s}
     return {"current": cur, "score": percentile_score(cur, s, spec["direction"]),
-            "n": len(s), "method": "percentile", "stale": False, "series": s}
+            "n": len(s), "method": "percentile", "stale": False, "date": date, "series": s}
 
 
 def _score_manual(spec, series):
