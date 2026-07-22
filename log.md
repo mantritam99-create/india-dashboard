@@ -122,3 +122,9 @@ trip-wires. The breadth discount is doing exactly its job.
 - buckets: valuation=56.7 / external_currency=59.2 / macro_stress=15.6 / domestic_flows=47.8 / sentiment_froth=32.8
 - trip-wires: 0/7 | live 21/22
 - highest stress: Brent crude, INR-adjusted (97), Earnings yield - 10Y G-sec (pp) (90), USD/INR 12-month % move (79)
+
+### 2026-07-22 12:23
+- composite (posture) **26.4** +/-22.7 | raw 44.4 | breadth 0.19 | NO CRISIS SIGNAL
+- buckets: valuation=56.7 / external_currency=59.2 / macro_stress=15.6 / domestic_flows=47.8 / sentiment_froth=34.5
+- trip-wires: 0/7 | live 21/22
+- highest stress: Brent crude, INR-adjusted (96), Earnings yield - 10Y G-sec (pp) (90), USD/INR 12-month % move (80)
