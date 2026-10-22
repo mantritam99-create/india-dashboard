@@ -903,7 +903,7 @@
       },
       {
         "d": "2026-10",
-        "v": 56.9
+        "v": 57.2
       }
     ],
     "bands": [
@@ -938,13 +938,13 @@
   "distance_to_trip": [
     {
       "name": "USD/INR",
-      "current": 94.4499969482422,
+      "current": 94.80799865722656,
       "floor": 83,
       "level": 100,
       "unit": "",
       "trips_when": "above",
       "note": "rupee crisis zone (tuned from 90; spot ~96)",
-      "fill": 0.674,
+      "fill": 0.695,
       "tripped": false
     },
     {
@@ -982,13 +982,13 @@
     },
     {
       "name": "India VIX",
-      "current": 15.675000190734863,
+      "current": 15.762499809265137,
       "floor": 11,
       "level": 25,
       "unit": "",
       "trips_when": "above",
       "note": "volatility regime break",
-      "fill": 0.334,
+      "fill": 0.34,
       "tripped": false
     },
     {
@@ -1004,13 +1004,13 @@
     },
     {
       "name": "Brent crude (USD)",
-      "current": 108.45999908447266,
+      "current": 111.0999984741211,
       "floor": 65,
       "level": 100,
       "unit": "",
       "trips_when": "above",
       "note": "oil import shock",
-      "fill": 1.242,
+      "fill": 1.25,
       "tripped": true
     }
   ],
@@ -1052,25 +1052,25 @@
   "analogs": [
     {
       "period": "2012-12",
-      "similarity": 94
-    },
-    {
-      "period": "2014-05",
       "similarity": 93
     },
     {
-      "period": "2025-01",
-      "similarity": 91
+      "period": "2014-05",
+      "similarity": 92
     },
     {
       "period": "2013-12",
-      "similarity": 89
+      "similarity": 90
+    },
+    {
+      "period": "2025-01",
+      "similarity": 90
     }
   ],
   "regime": {
     "label": "Late-cycle / asset-froth",
     "why": "valuations & froth elevated while growth stays resilient",
-    "slope_3m": -7.6
+    "slope_3m": -7.3
   },
   "stress_types": [
     {
@@ -1082,7 +1082,7 @@
     {
       "key": "credit",
       "label": "Credit / currency stress",
-      "score": 44,
+      "score": 45,
       "desc": "rupee, FII flows, reserves, oil, bonds"
     },
     {
@@ -1119,7 +1119,7 @@
     {
       "key": "external_currency",
       "label": "External / Currency",
-      "contribution": 14.15
+      "contribution": 14.275
     },
     {
       "key": "macro_stress",
@@ -1134,7 +1134,7 @@
     {
       "key": "sentiment_froth",
       "label": "Sentiment / Froth",
-      "contribution": 8.13
+      "contribution": 8.175
     }
   ],
   "freshness": {
@@ -1143,7 +1143,7 @@
     "n_total": 22,
     "stale_count": 16,
     "margin": 21.9,
-    "market_asof": "2026-10-21",
+    "market_asof": "2026-10-22",
     "manual_oldest": "2026-05-31",
     "manual_newest": "2026-05-31",
     "confidence": [
@@ -1164,10 +1164,10 @@
       }
     ]
   },
-  "generated": "2026-10-21T15:47:31.514142+00:00",
+  "generated": "2026-10-22T15:45:43.728340+00:00",
   "artifact": {
-    "generated_at": "2026-10-21T15:47:31.514142+00:00",
-    "market_as_of": "2026-10-21",
+    "generated_at": "2026-10-22T15:45:43.728340+00:00",
+    "market_as_of": "2026-10-22",
     "manual_as_of": "2026-05-31",
     "source_counts": {
       "manual": {
@@ -1188,10 +1188,10 @@
     },
     "margin": 21.9,
     "model_version": "india-risk-v2",
-    "source_sha": "a34fa342965a"
+    "source_sha": "ab6d2dc43c3e"
   },
-  "composite": 27.6,
-  "composite_raw": 46.7,
+  "composite": 27.7,
+  "composite_raw": 46.9,
   "margin": 21.9,
   "breadth": 0.18,
   "coverage": 1.0,
@@ -1222,7 +1222,7 @@
           "score": 44.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1239,7 +1239,7 @@
           "score": 40.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1256,7 +1256,7 @@
           "score": 52.5,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1283,7 +1283,7 @@
     {
       "key": "external_currency",
       "label": "External / Currency",
-      "score": 56.6,
+      "score": 57.1,
       "weight": 0.25,
       "weight_used": 0.25,
       "indicators": [
@@ -1295,12 +1295,12 @@
           "direction": "high",
           "source": "market",
           "method": "percentile",
-          "current": 5.7153,
-          "score": 64.8,
+          "current": 6.116,
+          "score": 66.7,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-10-21",
+          "date": "2026-10-22",
           "spark": [
             42.1,
             59.8,
@@ -1325,9 +1325,9 @@
             79.2,
             75.5,
             76.0,
-            72.6
+            70.7
           ],
-          "trend": -6.6
+          "trend": -8.5
         },
         {
           "key": "fx_reserves_8w",
@@ -1341,7 +1341,7 @@
           "score": 9.3,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1358,7 +1358,7 @@
           "score": 57.1,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1371,12 +1371,12 @@
           "direction": "high",
           "source": "market",
           "method": "percentile",
-          "current": 10244.0466,
-          "score": 98.9,
+          "current": 10533.1685,
+          "score": 99.1,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-10-21",
+          "date": "2026-10-22",
           "spark": [
             76.0,
             77.1,
@@ -1417,7 +1417,7 @@
           "score": 53.1,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1443,7 +1443,7 @@
           "score": 7.1,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1477,7 +1477,7 @@
           "score": 23.3,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1494,7 +1494,7 @@
           "score": 27.5,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1511,7 +1511,7 @@
           "score": 20.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1537,7 +1537,7 @@
           "score": 0.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1554,7 +1554,7 @@
           "score": 74.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1571,7 +1571,7 @@
           "score": 78.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1588,7 +1588,7 @@
           "score": 39.1,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1598,7 +1598,7 @@
     {
       "key": "sentiment_froth",
       "label": "Sentiment / Froth",
-      "score": 54.2,
+      "score": 54.5,
       "weight": 0.15,
       "weight_used": 0.15,
       "indicators": [
@@ -1610,12 +1610,12 @@
           "direction": "high",
           "source": "market",
           "method": "anchor",
-          "current": 15.675,
-          "score": 28.3,
+          "current": 15.7625,
+          "score": 28.9,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-10-21",
+          "date": "2026-10-22",
           "spark": [
             18.7,
             18.8,
@@ -1640,9 +1640,9 @@
             0.0,
             0.0,
             11.5,
-            21.3
+            28.3
           ],
-          "trend": 21.3
+          "trend": 28.3
         },
         {
           "key": "adv_decl",
@@ -1656,7 +1656,7 @@
           "score": 35.7,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1673,7 +1673,7 @@
           "score": 58.0,
           "ok": true,
           "stale": true,
-          "age_days": 143,
+          "age_days": 144,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1686,12 +1686,12 @@
           "direction": "high",
           "source": "market",
           "method": "percentile",
-          "current": 2.9659,
-          "score": 94.8,
+          "current": 2.9688,
+          "score": 95.2,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-10-21",
+          "date": "2026-10-22",
           "spark": [
             96.6,
             95.2,
@@ -1716,9 +1716,9 @@
             99.6,
             99.6,
             99.6,
-            97.4
+            95.2
           ],
-          "trend": -2.2
+          "trend": -4.4
         }
       ]
     }
@@ -1730,7 +1730,7 @@
       "unit": "",
       "trips_when": "above",
       "note": "rupee crisis zone (tuned from 90; spot ~96)",
-      "value": 94.45,
+      "value": 94.808,
       "tripped": false
     },
     {
@@ -1766,7 +1766,7 @@
       "unit": "",
       "trips_when": "above",
       "note": "volatility regime break",
-      "value": 15.675,
+      "value": 15.7625,
       "tripped": false
     },
     {
@@ -1784,7 +1784,7 @@
       "unit": "",
       "trips_when": "above",
       "note": "oil import shock",
-      "value": 108.46,
+      "value": 111.1,
       "tripped": true
     }
   ],
@@ -1833,7 +1833,7 @@
       "score": 44.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1850,7 +1850,7 @@
       "score": 40.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1867,7 +1867,7 @@
       "score": 52.5,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1897,12 +1897,12 @@
       "direction": "high",
       "source": "market",
       "method": "percentile",
-      "current": 5.7153,
-      "score": 64.8,
+      "current": 6.116,
+      "score": 66.7,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-10-21",
+      "date": "2026-10-22",
       "spark": [
         42.1,
         59.8,
@@ -1927,9 +1927,9 @@
         79.2,
         75.5,
         76.0,
-        72.6
+        70.7
       ],
-      "trend": -6.6
+      "trend": -8.5
     },
     {
       "key": "fx_reserves_8w",
@@ -1943,7 +1943,7 @@
       "score": 9.3,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1960,7 +1960,7 @@
       "score": 57.1,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1973,12 +1973,12 @@
       "direction": "high",
       "source": "market",
       "method": "percentile",
-      "current": 10244.0466,
-      "score": 98.9,
+      "current": 10533.1685,
+      "score": 99.1,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-10-21",
+      "date": "2026-10-22",
       "spark": [
         76.0,
         77.1,
@@ -2019,7 +2019,7 @@
       "score": 53.1,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2036,7 +2036,7 @@
       "score": 7.1,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2070,7 +2070,7 @@
       "score": 23.3,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2087,7 +2087,7 @@
       "score": 27.5,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2104,7 +2104,7 @@
       "score": 20.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2121,7 +2121,7 @@
       "score": 0.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2138,7 +2138,7 @@
       "score": 74.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2155,7 +2155,7 @@
       "score": 78.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2172,7 +2172,7 @@
       "score": 39.1,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2185,12 +2185,12 @@
       "direction": "high",
       "source": "market",
       "method": "anchor",
-      "current": 15.675,
-      "score": 28.3,
+      "current": 15.7625,
+      "score": 28.9,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-10-21",
+      "date": "2026-10-22",
       "spark": [
         18.7,
         18.8,
@@ -2215,9 +2215,9 @@
         0.0,
         0.0,
         11.5,
-        21.3
+        28.3
       ],
-      "trend": 21.3
+      "trend": 28.3
     },
     {
       "key": "adv_decl",
@@ -2231,7 +2231,7 @@
       "score": 35.7,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2248,7 +2248,7 @@
       "score": 58.0,
       "ok": true,
       "stale": true,
-      "age_days": 143,
+      "age_days": 144,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2261,12 +2261,12 @@
       "direction": "high",
       "source": "market",
       "method": "percentile",
-      "current": 2.9659,
-      "score": 94.8,
+      "current": 2.9688,
+      "score": 95.2,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-10-21",
+      "date": "2026-10-22",
       "spark": [
         96.6,
         95.2,
@@ -2291,23 +2291,23 @@
         99.6,
         99.6,
         99.6,
-        97.4
+        95.2
       ],
-      "trend": -2.2
+      "trend": -4.4
     }
   ],
   "context": [
     {
       "ticker": "^NSEI",
       "name": "Nifty 50",
-      "value": 22811.3496,
-      "chg_12m": -12.9436
+      "value": 22687.6504,
+      "chg_12m": -13.4157
     },
     {
       "ticker": "^NSEBANK",
       "name": "Bank Nifty",
-      "value": 54976.8984,
-      "chg_12m": -7.9926
+      "value": 54925.6992,
+      "chg_12m": -8.0783
     }
   ],
   "danger": [
