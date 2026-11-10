@@ -942,7 +942,7 @@
   "distance_to_trip": [
     {
       "name": "USD/INR",
-      "current": 93.91999816894531,
+      "current": 93.91799926757812,
       "floor": 83,
       "level": 100,
       "unit": "",
@@ -1008,13 +1008,13 @@
     },
     {
       "name": "Brent crude (USD)",
-      "current": 92.91000366210938,
+      "current": 91.80999755859375,
       "floor": 65,
       "level": 100,
       "unit": "",
       "trips_when": "above",
       "note": "oil import shock",
-      "fill": 0.797,
+      "fill": 0.766,
       "tripped": false
     }
   ],
@@ -1056,11 +1056,11 @@
   "analogs": [
     {
       "period": "2014-05",
-      "similarity": 93
+      "similarity": 94
     },
     {
       "period": "2025-01",
-      "similarity": 91
+      "similarity": 92
     },
     {
       "period": "2012-12",
@@ -1086,7 +1086,7 @@
     {
       "key": "credit",
       "label": "Credit / currency stress",
-      "score": 44,
+      "score": 43,
       "desc": "rupee, FII flows, reserves, oil, bonds"
     },
     {
@@ -1123,7 +1123,7 @@
     {
       "key": "external_currency",
       "label": "External / Currency",
-      "contribution": 13.9
+      "contribution": 13.825
     },
     {
       "key": "macro_stress",
@@ -1147,7 +1147,7 @@
     "n_total": 22,
     "stale_count": 16,
     "margin": 21.9,
-    "market_asof": "2026-11-09",
+    "market_asof": "2026-11-10",
     "manual_oldest": "2026-05-31",
     "manual_newest": "2026-05-31",
     "confidence": [
@@ -1168,10 +1168,10 @@
       }
     ]
   },
-  "generated": "2026-11-09T21:15:01.511581+00:00",
+  "generated": "2026-11-10T18:24:26.346129+00:00",
   "artifact": {
-    "generated_at": "2026-11-09T21:15:01.511581+00:00",
-    "market_as_of": "2026-11-09",
+    "generated_at": "2026-11-10T18:24:26.346129+00:00",
+    "market_as_of": "2026-11-10",
     "manual_as_of": "2026-05-31",
     "source_counts": {
       "manual": {
@@ -1192,7 +1192,7 @@
     },
     "margin": 21.9,
     "model_version": "india-risk-v2",
-    "source_sha": "7f75c2c60e58"
+    "source_sha": "e9ec19a9f10b"
   },
   "composite": 27.7,
   "composite_raw": 46.9,
@@ -1226,7 +1226,7 @@
           "score": 44.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1243,7 +1243,7 @@
           "score": 40.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1260,7 +1260,7 @@
           "score": 52.5,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1287,7 +1287,7 @@
     {
       "key": "external_currency",
       "label": "External / Currency",
-      "score": 55.6,
+      "score": 55.3,
       "weight": 0.25,
       "weight_used": 0.25,
       "indicators": [
@@ -1299,12 +1299,12 @@
           "direction": "high",
           "source": "market",
           "method": "percentile",
-          "current": 5.1221,
+          "current": 5.1199,
           "score": 61.9,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-11-09",
+          "date": "2026-11-10",
           "spark": [
             59.8,
             59.9,
@@ -1345,7 +1345,7 @@
           "score": 9.3,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1362,7 +1362,7 @@
           "score": 57.1,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1375,12 +1375,12 @@
           "direction": "high",
           "source": "market",
           "method": "percentile",
-          "current": 8726.1074,
-          "score": 96.6,
+          "current": 8622.6113,
+          "score": 95.2,
           "ok": true,
           "stale": false,
           "age_days": null,
-          "date": "2026-11-09",
+          "date": "2026-11-10",
           "spark": [
             77.1,
             84.4,
@@ -1421,7 +1421,7 @@
           "score": 53.1,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1447,7 +1447,7 @@
           "score": 7.1,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1481,7 +1481,7 @@
           "score": 23.3,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1498,7 +1498,7 @@
           "score": 27.5,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1515,7 +1515,7 @@
           "score": 20.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1541,7 +1541,7 @@
           "score": 0.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1558,7 +1558,7 @@
           "score": 74.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1575,7 +1575,7 @@
           "score": 78.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1592,7 +1592,7 @@
           "score": 39.1,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1660,7 +1660,7 @@
           "score": 35.7,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1677,7 +1677,7 @@
           "score": 58.0,
           "ok": true,
           "stale": true,
-          "age_days": 162,
+          "age_days": 163,
           "date": "2026-05-31",
           "spark": null,
           "trend": null
@@ -1734,7 +1734,7 @@
       "unit": "",
       "trips_when": "above",
       "note": "rupee crisis zone (tuned from 90; spot ~96)",
-      "value": 93.92,
+      "value": 93.918,
       "tripped": false
     },
     {
@@ -1788,7 +1788,7 @@
       "unit": "",
       "trips_when": "above",
       "note": "oil import shock",
-      "value": 92.91,
+      "value": 91.81,
       "tripped": false
     }
   ],
@@ -1837,7 +1837,7 @@
       "score": 44.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1854,7 +1854,7 @@
       "score": 40.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1871,7 +1871,7 @@
       "score": 52.5,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1901,12 +1901,12 @@
       "direction": "high",
       "source": "market",
       "method": "percentile",
-      "current": 5.1221,
+      "current": 5.1199,
       "score": 61.9,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-11-09",
+      "date": "2026-11-10",
       "spark": [
         59.8,
         59.9,
@@ -1947,7 +1947,7 @@
       "score": 9.3,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1964,7 +1964,7 @@
       "score": 57.1,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -1977,12 +1977,12 @@
       "direction": "high",
       "source": "market",
       "method": "percentile",
-      "current": 8726.1074,
-      "score": 96.6,
+      "current": 8622.6113,
+      "score": 95.2,
       "ok": true,
       "stale": false,
       "age_days": null,
-      "date": "2026-11-09",
+      "date": "2026-11-10",
       "spark": [
         77.1,
         84.4,
@@ -2023,7 +2023,7 @@
       "score": 53.1,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2040,7 +2040,7 @@
       "score": 7.1,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2074,7 +2074,7 @@
       "score": 23.3,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2091,7 +2091,7 @@
       "score": 27.5,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2108,7 +2108,7 @@
       "score": 20.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2125,7 +2125,7 @@
       "score": 0.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2142,7 +2142,7 @@
       "score": 74.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2159,7 +2159,7 @@
       "score": 78.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2176,7 +2176,7 @@
       "score": 39.1,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2235,7 +2235,7 @@
       "score": 35.7,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
@@ -2252,7 +2252,7 @@
       "score": 58.0,
       "ok": true,
       "stale": true,
-      "age_days": 162,
+      "age_days": 163,
       "date": "2026-05-31",
       "spark": null,
       "trend": null
